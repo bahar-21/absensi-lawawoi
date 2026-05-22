@@ -63,6 +63,33 @@
       color: #334155;
     }
 
+    .label-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 12px 0 6px;
+    }
+
+    .label-row label {
+      margin: 0;
+    }
+
+    .info-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+    }
+
     input, select, textarea {
       width: 100%;
       padding: 13px;
@@ -392,14 +419,14 @@
       </div>
 
       <h3 class="small-title">Registrasi Perangkat</h3>
-      <label>NIK Pegawai</label>
+      <label>ID Pegawai</label>
       <div class="nik-row">
-        <input id="inputNIK" type="tel" inputmode="numeric" placeholder="Masukkan NIK" autocomplete="off" />
-        <button class="btn-main" onclick="cekNIK()">Cek NIK</button>
+        <input id="inputIdPegawai" type="tel" inputmode="numeric" placeholder="Masukkan NIP atau NIK" autocomplete="off" />
+        <button class="btn-main" onclick="cekIdPegawai()">Cek ID</button>
       </div>
 
       <div class="note">
-        Masukkan NIK satu kali. Jika terdaftar, perangkat ini akan terkunci untuk pegawai tersebut.
+        Masukkan ID Pegawai satu kali. Gunakan NIP bagi yang memiliki NIP, atau NIK bagi yang belum memiliki NIP.
       </div>
       <div id="registerMessage" class="status hidden"></div>
     </div>
@@ -430,14 +457,20 @@
       </div>
 
       <input id="nama" type="hidden" />
-      <input id="nikPegawai" type="hidden" />
+      <input id="idPegawai" type="hidden" />
       <input id="jabatanPegawai" type="hidden" />
       <input id="unitPegawai" type="hidden" />
 
-      <label id="labelDetailAbsen">Jenis Dinas / Kegiatan</label>
+      <div class="label-row">
+        <label id="labelDetailAbsen">Jenis Dinas / Kegiatan</label>
+        <span class="info-icon" onclick="infoJenisDinas()" title="Informasi jam absensi">!</span>
+      </div>
       <select id="detailAbsen"></select>
 
-      <label>Keterangan / Lokasi Tugas</label>
+      <div class="label-row">
+        <label id="labelKeterangan">Keterangan / Lokasi Tugas</label>
+        <span class="info-icon" onclick="infoKeterangan()" title="Informasi keterangan">!</span>
+      </div>
       <textarea id="keterangan" rows="2" placeholder="Opsional, contoh: Posyandu / UGD / Piket malam"></textarea>
 
       <button id="btnMulaiAbsen" class="btn-main" onclick="prosesAwalAbsensi()">Lanjut Ambil Foto</button>
@@ -501,11 +534,54 @@
     let pegawaiAktif = null;
     const LINK_FORM_REGISTER = 'https://tally.so/r/RGVzZ4';
 
-    const pilihanDetail = {
-      Datang: ['Dinas Pagi', 'Dinas Sore', 'Dinas Malam', 'Tugas Luar'],
-      Pulang: ['Dinas Pagi', 'Dinas Sore', 'Dinas Malam', 'Tugas Luar'],
-      Keterangan: ['Libur', 'Sakit', 'Tugas Luar', 'Dinas Sore', 'Dinas Malam']
+    const jadwalDinas = {
+      Datang: [
+        { nama: 'Dinas Pagi', mulai: '07:15', selesai: '12:00' },
+        { nama: 'Dinas Sore', mulai: '13:45', selesai: '18:00' },
+        { nama: 'Dinas Malam', mulai: '19:45', selesai: '23:00' }
+      ],
+      Pulang: [
+        { nama: 'Dinas Pagi', mulai: '11:30', selesai: '18:00' },
+        { nama: 'Dinas Sore', mulai: '20:00', selesai: '23:00' },
+        { nama: 'Dinas Malam', mulai: '08:00', selesai: '10:00' }
+      ],
+      Keterangan: [
+        { nama: 'Libur' },
+        { nama: 'Sakit' },
+        { nama: 'Informasi Dinas Luar' },
+        { nama: 'Dinas Malam' },
+        { nama: 'Dinas Sore' }
+      ]
     };
+
+    function jamKeMenit(jamText) {
+      const [jam, menit] = jamText.split(':').map(Number);
+      return (jam * 60) + menit;
+    }
+
+    function menitSekarang() {
+      const now = new Date();
+      return (now.getHours() * 60) + now.getMinutes();
+    }
+
+    function dalamRentangJam(jadwal, menitNow = menitSekarang()) {
+      const mulai = jamKeMenit(jadwal.mulai);
+      const selesai = jamKeMenit(jadwal.selesai);
+      return menitNow >= mulai && menitNow <= selesai;
+    }
+
+    function pilihanAktifBerdasarkanJam(menu) {
+      if (menu === 'Keterangan') return jadwalDinas.Keterangan.map(j => j.nama);
+
+      const pilihanJamAktif = jadwalDinas[menu]
+        .filter(j => dalamRentangJam(j))
+        .map(j => j.nama);
+
+      // Dinas Luar tetap selalu tersedia untuk Datang dan Pulang.
+      // Jika tidak ada Dinas Pagi/Sore/Malam yang aktif, default otomatis Dinas Luar.
+      pilihanJamAktif.push('Dinas Luar');
+      return pilihanJamAktif;
+    }
 
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
@@ -544,6 +620,10 @@
 
       document.querySelectorAll('.currentDateText').forEach(el => el.textContent = tanggal);
       document.querySelectorAll('.currentClockText').forEach(el => el.textContent = jam);
+
+      if (document.getElementById('formArea') && !document.getElementById('formArea').classList.contains('hidden')) {
+        isiPilihanDetailBerdasarkanJam();
+      }
     }
 
     function muatPegawaiTersimpan() {
@@ -595,7 +675,7 @@
       document.getElementById('formArea').classList.remove('hidden');
 
       document.getElementById('nama').value = pegawaiAktif.nama || '';
-      document.getElementById('nikPegawai').value = pegawaiAktif.nik || '';
+      document.getElementById('idPegawai').value = pegawaiAktif.idPegawai || pegawaiAktif.nik || '';
       document.getElementById('jabatanPegawai').value = pegawaiAktif.jabatan || '';
       document.getElementById('unitPegawai').value = pegawaiAktif.unit || '';
 
@@ -604,29 +684,30 @@
       tampilkanStatusTerakhir();
     }
 
-    function cekNIK() {
-      const nik = document.getElementById('inputNIK').value.trim();
+    function cekIdPegawai() {
+      const idPegawai = document.getElementById('inputIdPegawai').value.trim();
       const box = document.getElementById('registerMessage');
 
-      if (!nik) {
+      if (!idPegawai) {
         box.className = 'status error';
-        box.textContent = 'NIK wajib diisi.';
+        box.textContent = 'ID Pegawai wajib diisi.';
         box.classList.remove('hidden');
         return;
       }
 
       box.className = 'status warning';
-      box.textContent = 'Memeriksa NIK...';
+      box.textContent = 'Memeriksa ID Pegawai...';
       box.classList.remove('hidden');
 
-      const callbackName = 'hasilCekNIK_' + Date.now();
+      const callbackName = 'hasilCekIdPegawai_' + Date.now();
 
       window[callbackName] = function(res) {
         delete window[callbackName];
 
         if (res && res.ditemukan) {
           pegawaiAktif = {
-            nik: res.nik,
+            idPegawai: res.idPegawai || res.ID_Pegawai || res.nik,
+            nik: res.idPegawai || res.ID_Pegawai || res.nik,
             nama: res.nama,
             jabatan: res.jabatan || '',
             unit: res.unit || ''
@@ -634,16 +715,16 @@
 
           localStorage.setItem('absen_pegawai', JSON.stringify(pegawaiAktif));
           box.className = 'status success';
-          box.textContent = 'NIK ditemukan. Perangkat ini sudah terkunci untuk ' + pegawaiAktif.nama + '.';
+          box.textContent = 'ID Pegawai ditemukan. Perangkat ini sudah terkunci untuk ' + pegawaiAktif.nama + '.';
           tampilkanFormAbsensi();
         } else {
           box.className = 'status error';
-          box.innerHTML = (res && res.pesan ? res.pesan : 'NIK belum terdaftar.') + '<br><br><a href="' + LINK_FORM_REGISTER + '" target="_blank">Buka Form Register Pegawai</a>';
+          box.innerHTML = (res && res.pesan ? res.pesan : 'ID Pegawai belum terdaftar.') + '<br><br><a href="' + LINK_FORM_REGISTER + '" target="_blank">Buka Form Register Pegawai</a>';
         }
       };
 
       const script = document.createElement('script');
-      script.src = WEB_APP_URL + '?aksi=cekNIK&nik=' + encodeURIComponent(nik) + '&callback=' + callbackName;
+      script.src = WEB_APP_URL + '?aksi=cekNIK&nik=' + encodeURIComponent(idPegawai) + '&callback=' + callbackName;
       script.onerror = function() {
         delete window[callbackName];
         box.className = 'status error';
@@ -660,20 +741,6 @@
       document.getElementById('menuPulang').classList.toggle('active', menu === 'Pulang');
       document.getElementById('menuLainnya').classList.toggle('active', menu === 'Keterangan');
 
-      const select = document.getElementById('detailAbsen');
-      select.innerHTML = '';
-      pilihanDetail[menu].forEach((item, index) => {
-        const opt = document.createElement('option');
-        opt.value = item;
-        opt.textContent = item;
-
-        if ((menu === 'Datang' || menu === 'Pulang') && index === 0) {
-          opt.selected = true;
-        }
-
-        select.appendChild(opt);
-      });
-
       document.getElementById('labelDetailAbsen').textContent = menu === 'Keterangan'
         ? 'Status Keterangan'
         : 'Jenis Dinas / Kegiatan';
@@ -685,6 +752,156 @@
       } else {
         btnMulai.textContent = 'Lanjut Ambil Foto';
       }
+
+      updateLabelKeterangan();
+      isiPilihanDetailBerdasarkanJam();
+    }
+
+    function updateLabelKeterangan() {
+      const label = document.getElementById('labelKeterangan');
+      const input = document.getElementById('keterangan');
+      if (!label || !input) return;
+
+      if (menuAbsenAktif === 'Datang') {
+        label.textContent = 'Keterangan Lokasi / Tujuan Tugas';
+        input.placeholder = 'Contoh: Posyandu Teratai 1 / UGD / Loket';
+      } else if (menuAbsenAktif === 'Pulang') {
+        label.textContent = 'Keterangan Hasil Kegiatan';
+        input.placeholder = 'Contoh: Pelayanan 32 pasien / Posyandu 18 sasaran';
+      } else {
+        label.textContent = 'Keterangan';
+        input.placeholder = 'Contoh: Lepas Malam / Libur P3K / Libur Jaga Malam';
+      }
+    }
+
+    function infoJenisDinas() {
+      let pesan = '';
+
+      if (menuAbsenAktif === 'Datang') {
+
+        pesan =
+          'Informasi Absensi Datang:\n\n' +
+          'Pilihan jenis dinas akan muncul sesuai jam absensi yang dibuka.\n\n' +
+          'Mulai dibuka:\n' +
+          '- Dinas Pagi : 07.15\n' +
+          '- Dinas Sore : 13.45\n' +
+          '- Dinas Malam : 19.45\n\n' +
+          'Dinas Luar tetap tersedia setiap saat.';
+
+      } else if (menuAbsenAktif === 'Pulang') {
+
+        pesan =
+          'Informasi Absensi Pulang:\n\n' +
+          'Pilihan jenis dinas akan muncul sesuai jam absensi yang dibuka.\n\n' +
+          'Mulai dibuka:\n' +
+          '- Dinas Pagi : 11.30\n' +
+          '- Dinas Sore : 20.00\n' +
+          '- Dinas Malam : 08.00\n\n' +
+          'Dinas Luar tetap tersedia setiap saat.';
+
+      } else {
+
+        pesan =
+          'Informasi Status Keterangan:\n\n' +
+          'Status Keterangan hanya dapat diisi pukul 00.01 - 08.00 dan hanya satu kali dalam sehari.\n\n' +
+          'Pilihan status:\n' +
+          '- Libur\n' +
+          '- Sakit\n' +
+          '- Informasi Dinas Luar\n' +
+          '- Dinas Malam\n' +
+          '- Dinas Sore';
+
+      }
+
+      alert(pesan);
+    }
+
+    function infoKeterangan() {
+      let pesan = '';
+
+      if (menuAbsenAktif === 'Datang') {
+        pesan =
+          'Keterangan saat Datang diisi dengan lokasi atau tujuan tugas.\n\n' +
+          'Contoh: Posyandu Teratai 1, UGD, Loket, atau Kunjungan rumah.';
+      } else if (menuAbsenAktif === 'Pulang') {
+        pesan =
+          'Keterangan saat Pulang diisi dengan hasil kegiatan berupa data kuantitas atau ringkasan layanan.\n\n' +
+          'Contoh:\n' +
+          '- Pelayanan 32 pasien\n' +
+          '- Posyandu 18 sasaran\n' +
+          '- Imunisasi 12 anak\n' +
+          '- Kunjungan rumah 5 pasien';
+      } else {
+        pesan =
+          'Kolom keterangan dapat diisi contoh seperti:\n' +
+          '- Lepas Malam\n' +
+          '- Libur P3K\n' +
+          '- Libur Jaga Malam';
+      }
+
+      alert(pesan);
+    }
+
+    function bolehIsiKeterangan() {
+      const now = new Date();
+      const menitNow = (now.getHours() * 60) + now.getMinutes();
+
+      // 00:01 sampai 08:00
+      const mulai = 1;
+      const selesai = 480;
+
+      if (menitNow < mulai || menitNow > selesai) {
+        return false;
+      }
+
+      const tanggalHariIni = now.toISOString().slice(0,10);
+      const terakhir = localStorage.getItem('absen_keterangan_terakhir');
+
+      return terakhir !== tanggalHariIni;
+    }
+
+    function isiPilihanDetailBerdasarkanJam() {
+      const select = document.getElementById('detailAbsen');
+      const btnMulai = document.getElementById('btnMulaiAbsen');
+      if (!select || !btnMulai) return;
+
+      // Pembatasan khusus menu Keterangan
+      if (menuAbsenAktif === 'Keterangan' && !bolehIsiKeterangan()) {
+        select.innerHTML = '';
+
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Keterangan hanya dapat dikirim pukul 00.01 - 08.00 sekali sehari';
+        select.appendChild(opt);
+
+        select.disabled = true;
+        btnMulai.disabled = true;
+        return;
+      }
+
+      const pilihan = pilihanAktifBerdasarkanJam(menuAbsenAktif);
+      select.innerHTML = '';
+
+      if (pilihan.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Tidak ada pilihan absensi saat ini';
+        select.appendChild(opt);
+        select.disabled = true;
+        btnMulai.disabled = true;
+        return;
+      }
+
+      pilihan.forEach((item, index) => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        if (index === 0) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      select.disabled = false;
+      btnMulai.disabled = false;
     }
 
     function tampilStatus(pesan, tipe = '') {
@@ -724,7 +941,7 @@
     async function kirimKeteranganLangsung() {
       try {
         const data = {
-          nik: document.getElementById('nikPegawai').value.trim(),
+          idPegawai: document.getElementById('idPegawai').value.trim(),
           nama: document.getElementById('nama').value.trim(),
           jabatan: document.getElementById('jabatanPegawai').value.trim(),
           unit: document.getElementById('unitPegawai').value.trim(),
@@ -764,6 +981,10 @@
         };
 
         localStorage.setItem('absen_status_terakhir', JSON.stringify(statusTerakhir));
+
+        // Menandai bahwa menu Keterangan sudah dipakai hari ini
+        const today = new Date().toISOString().slice(0,10);
+        localStorage.setItem('absen_keterangan_terakhir', today);
         tampilkanStatusTerakhir();
 
         tampilStatus('Keterangan berhasil dikirim.', 'success');
@@ -951,7 +1172,7 @@
         }
 
         const data = {
-          nik: document.getElementById('nikPegawai').value.trim(),
+          idPegawai: document.getElementById('idPegawai').value.trim(),
           nama: document.getElementById('nama').value.trim(),
           jabatan: document.getElementById('jabatanPegawai').value.trim(),
           unit: document.getElementById('unitPegawai').value.trim(),
