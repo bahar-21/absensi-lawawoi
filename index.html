@@ -21,6 +21,7 @@
       margin: auto;
       background: #ffffff;
       padding: 18px;
+      padding-bottom: 96px;
     }
 
     .header {
@@ -220,22 +221,36 @@
     }
 
     .time-box .date {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
+      margin-top: 3px;
+      color: #0f766e;
     }
 
     .time-box .clock {
-      font-size: 24px;
+      font-family: "Courier New", Consolas, monospace;
+      font-size: 34px;
       font-weight: 900;
-      letter-spacing: 1px;
-      margin-top: 3px;
+      letter-spacing: 2px;
+      line-height: 1;
+      color: #022c22;
     }
 
     .menu-grid {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      margin: 10px 0 12px;
+      padding: 10px 14px 14px;
+      background: rgba(255,255,255,.96);
+      border-top: 1px solid #e2e8f0;
+      box-shadow: 0 -8px 20px rgba(15, 23, 42, .08);
+      z-index: 30;
     }
 
     .menu-btn {
@@ -294,6 +309,75 @@
       font-size: 16px;
       z-index: 5;
     }
+
+    .nik-row {
+      display: grid;
+      grid-template-columns: 1fr 96px;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .nik-row button {
+      margin-top: 0;
+      padding: 13px 8px;
+      font-size: 14px;
+    }
+
+    .welcome-box {
+      position: relative;
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      color: #134e4a;
+      border-radius: 16px;
+      padding: 13px;
+      margin-bottom: 14px;
+    }
+
+    .last-status {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      text-align: right;
+      font-size: 10px;
+      line-height: 1.2;
+      color: #b91c1c;
+      max-width: 180px;
+    }
+
+    .last-status .status-main {
+      display: block;
+      font-weight: 400;
+      color: #b91c1c;
+    }
+
+    .last-status .status-sub {
+      display: block;
+      margin-top: 0;
+      font-weight: 400;
+      color: #b91c1c;
+    }
+
+    .last-status .status-time {
+      display: none;
+    }
+
+    .welcome-box .hello {
+      font-size: 12px;
+      color: #0f766e;
+      font-weight: 700;
+    }
+
+    .welcome-box .name {
+      font-size: 20px;
+      font-weight: 900;
+      margin-top: 3px;
+    }
+
+    .welcome-box .meta {
+      font-size: 12px;
+      margin-top: 3px;
+      color: #475569;
+    }
   </style>
 </head>
 
@@ -304,13 +388,44 @@
       <p>Puskesmas Lawawoi</p>
     </div>
 
-    <div id="formArea" class="card">
+    <div id="registerArea" class="card hidden">
       <div class="time-box">
-        <div class="date" id="tanggalHariIni">-</div>
-        <div class="clock" id="jamHariIni">--:--:--</div>
+        <div class="clock currentClockText">--:--:--</div>
+        <div class="date currentDateText">-</div>
       </div>
 
-      <h3 class="small-title">Pilih Alur Absensi</h3>
+      <h3 class="small-title">Registrasi Perangkat</h3>
+      <label>NIK Pegawai</label>
+      <div class="nik-row">
+        <input id="inputNIK" type="tel" inputmode="numeric" placeholder="Masukkan NIK" autocomplete="off" />
+        <button class="btn-main" onclick="cekNIK()">Cek NIK</button>
+      </div>
+
+      <div class="note">
+        Masukkan NIK satu kali. Jika terdaftar, perangkat ini akan terkunci untuk pegawai tersebut.
+      </div>
+      <div id="registerMessage" class="status hidden"></div>
+    </div>
+
+    <div id="formArea" class="card hidden">
+      <div class="time-box">
+        <div class="clock" id="jamHariIni">--:--:--</div>
+        <div class="date" id="tanggalHariIni">-</div>
+      </div>
+
+      <div class="welcome-box">
+        <div class="hello">Selamat datang,</div>
+        <div class="name" id="namaPegawaiDisplay">-</div>
+        <div class="meta" id="metaPegawaiDisplay">-</div>
+
+        <div id="lastStatusBox" class="last-status hidden">
+        <span id="lastStatusLine1" class="status-main">-</span>
+        <span id="lastStatusLine2" class="status-sub">-</span>
+        <span id="lastStatusLine3" class="status-time">-</span>
+        </div>
+      </div>
+
+      <h3 class="small-title">Form Absensi</h3>
 
       <div class="menu-grid">
         <button type="button" id="menuDatang" class="menu-btn active" onclick="pilihMenuAbsen('Datang')">Datang</button>
@@ -318,8 +433,10 @@
         <button type="button" id="menuLainnya" class="menu-btn" onclick="pilihMenuAbsen('Keterangan')">Keterangan</button>
       </div>
 
-      <label>Nama Pegawai</label>
-      <input id="nama" type="text" placeholder="Masukkan nama lengkap" autocomplete="name" />
+      <input id="nama" type="hidden" />
+      <input id="nikPegawai" type="hidden" />
+      <input id="jabatanPegawai" type="hidden" />
+      <input id="unitPegawai" type="hidden" />
 
       <label id="labelDetailAbsen">Jenis Dinas / Kegiatan</label>
       <select id="detailAbsen"></select>
@@ -336,8 +453,8 @@
 
     <div id="cameraArea" class="card hidden">
       <div class="time-box">
-        <div class="date currentDateText">-</div>
         <div class="clock currentClockText">--:--:--</div>
+        <div class="date currentDateText">-</div>
       </div>
       <h3 class="small-title">Ambil Foto</h3>
       <div class="camera-wrap">
@@ -350,8 +467,8 @@
 
     <div id="previewArea" class="card hidden">
       <div class="time-box">
-        <div class="date currentDateText">-</div>
         <div class="clock currentClockText">--:--:--</div>
+        <div class="date currentDateText">-</div>
       </div>
       <h3 class="small-title">Pratinjau & GPS</h3>
       <div class="photo-box">
@@ -385,6 +502,8 @@
     let lokasiTerakhir = null;
     let sedangKirim = false;
     let menuAbsenAktif = 'Datang';
+    let pegawaiAktif = null;
+    const LINK_FORM_REGISTER = '#';
 
     const pilihanDetail = {
       Datang: ['Dinas Pagi', 'Dinas Sore', 'Dinas Malam', 'Tugas Luar'],
@@ -401,7 +520,7 @@
     const btnUlangGps = document.getElementById('btnUlangGps');
 
     function mulaiAplikasi() {
-      document.getElementById('nama').value = localStorage.getItem('absen_nama') || '';
+      muatPegawaiTersimpan();
       pilihMenuAbsen('Datang');
       updateJamTanggal();
       setInterval(updateJamTanggal, 1000);
@@ -422,11 +541,123 @@
         hour: '2-digit', minute: '2-digit', second: '2-digit'
       });
 
-      document.getElementById('tanggalHariIni').textContent = tanggal;
-      document.getElementById('jamHariIni').textContent = jam;
+      const tglUtama = document.getElementById('tanggalHariIni');
+      const jamUtama = document.getElementById('jamHariIni');
+      if (tglUtama) tglUtama.textContent = tanggal;
+      if (jamUtama) jamUtama.textContent = jam;
 
       document.querySelectorAll('.currentDateText').forEach(el => el.textContent = tanggal);
       document.querySelectorAll('.currentClockText').forEach(el => el.textContent = jam);
+    }
+
+    function muatPegawaiTersimpan() {
+      const saved = localStorage.getItem('absen_pegawai');
+
+      if (saved) {
+        try {
+          pegawaiAktif = JSON.parse(saved);
+          tampilkanFormAbsensi();
+          return;
+        } catch (err) {
+          localStorage.removeItem('absen_pegawai');
+        }
+      }
+
+      document.getElementById('registerArea').classList.remove('hidden');
+      document.getElementById('formArea').classList.add('hidden');
+    }
+
+    function tampilkanStatusTerakhir() {
+      const saved = localStorage.getItem('absen_status_terakhir');
+      const box = document.getElementById('lastStatusBox');
+      const line1 = document.getElementById('lastStatusLine1');
+      const line2 = document.getElementById('lastStatusLine2');
+      const line3 = document.getElementById('lastStatusLine3');
+
+      if (!saved) {
+        box.classList.add('hidden');
+        return;
+      }
+
+      try {
+        const data = JSON.parse(saved);
+        line1.textContent = 'Terkirim : ' + data.tanggal + ' ' + data.jam;
+        line2.textContent = 'Status : ' + data.status;
+        line3.textContent = '';
+      } catch (err) {
+        // Jika masih tersimpan format lama, hapus agar tidak tampil berantakan
+        localStorage.removeItem('absen_status_terakhir');
+        line1.textContent = '';
+        line2.textContent = '';
+        line3.textContent = '';
+        box.classList.add('hidden');
+        return;
+      }
+
+      box.classList.remove('hidden');
+    }
+
+    function tampilkanFormAbsensi() {
+      document.getElementById('registerArea').classList.add('hidden');
+      document.getElementById('formArea').classList.remove('hidden');
+
+      document.getElementById('nama').value = pegawaiAktif.nama || '';
+      document.getElementById('nikPegawai').value = pegawaiAktif.nik || '';
+      document.getElementById('jabatanPegawai').value = pegawaiAktif.jabatan || '';
+      document.getElementById('unitPegawai').value = pegawaiAktif.unit || '';
+
+      document.getElementById('namaPegawaiDisplay').textContent = pegawaiAktif.nama || '-';
+      document.getElementById('metaPegawaiDisplay').textContent = (pegawaiAktif.jabatan || '-') + ' • ' + (pegawaiAktif.unit || '-');
+      tampilkanStatusTerakhir();
+    }
+
+    function cekNIK() {
+      const nik = document.getElementById('inputNIK').value.trim();
+      const box = document.getElementById('registerMessage');
+
+      if (!nik) {
+        box.className = 'status error';
+        box.textContent = 'NIK wajib diisi.';
+        box.classList.remove('hidden');
+        return;
+      }
+
+      box.className = 'status warning';
+      box.textContent = 'Memeriksa NIK...';
+      box.classList.remove('hidden');
+
+      const callbackName = 'hasilCekNIK_' + Date.now();
+
+      window[callbackName] = function(res) {
+        delete window[callbackName];
+
+        if (res && res.ditemukan) {
+          pegawaiAktif = {
+            nik: res.nik,
+            nama: res.nama,
+            jabatan: res.jabatan || '',
+            unit: res.unit || ''
+          };
+
+          localStorage.setItem('absen_pegawai', JSON.stringify(pegawaiAktif));
+          box.className = 'status success';
+          box.textContent = 'NIK ditemukan. Perangkat ini sudah terkunci untuk ' + pegawaiAktif.nama + '.';
+          tampilkanFormAbsensi();
+        } else {
+          box.className = 'status error';
+          box.innerHTML = (res && res.pesan ? res.pesan : 'NIK belum terdaftar.') + '<br><br><a href="' + LINK_FORM_REGISTER + '" target="_blank">Buka Form Register Pegawai</a>';
+        }
+      };
+
+      const script = document.createElement('script');
+      script.src = WEB_APP_URL + '?aksi=cekNIK&nik=' + encodeURIComponent(nik) + '&callback=' + callbackName;
+      script.onerror = function() {
+        delete window[callbackName];
+        box.className = 'status error';
+        box.textContent = 'Gagal menghubungi server.';
+      };
+      document.body.appendChild(script);
+      setTimeout(() => script.remove(), 15000);
     }
 
     function pilihMenuAbsen(menu) {
@@ -495,7 +726,10 @@
     async function kirimKeteranganLangsung() {
       try {
         const data = {
+          nik: document.getElementById('nikPegawai').value.trim(),
           nama: document.getElementById('nama').value.trim(),
+          jabatan: document.getElementById('jabatanPegawai').value.trim(),
+          unit: document.getElementById('unitPegawai').value.trim(),
           statusAbsen: 'Keterangan',
           detailAbsen: document.getElementById('detailAbsen').value,
           keterangan: document.getElementById('keterangan').value.trim(),
@@ -526,13 +760,17 @@
           hour: '2-digit', minute: '2-digit', second: '2-digit'
         });
 
-        tampilStatus(
-          '✅ Keterangan berhasil dikirim.\n\n' +
-          'Status: ' + data.detailAbsen + '\n' +
-          'Tanggal: ' + tanggal + '\n' +
-          'Jam: ' + jam,
-          'success'
-        );
+        const statusTerakhir = {
+          judul: 'Keterangan telah dikirim',
+          status: data.detailAbsen,
+          tanggal: tanggal,
+          jam: jam
+        };
+
+        localStorage.setItem('absen_status_terakhir', JSON.stringify(statusTerakhir));
+        tampilkanStatusTerakhir();
+
+        tampilStatus('Keterangan berhasil dikirim.', 'success');
 
         document.getElementById('keterangan').value = '';
         pilihMenuAbsen('Datang');
@@ -556,7 +794,6 @@
         return false;
       }
 
-      localStorage.setItem('absen_nama', nama);
       return true;
     }
 
@@ -722,7 +959,10 @@
         }
 
         const data = {
+          nik: document.getElementById('nikPegawai').value.trim(),
           nama: document.getElementById('nama').value.trim(),
+          jabatan: document.getElementById('jabatanPegawai').value.trim(),
+          unit: document.getElementById('unitPegawai').value.trim(),
           statusAbsen: menuAbsenAktif,
           detailAbsen: document.getElementById('detailAbsen').value,
           keterangan: document.getElementById('keterangan').value.trim(),
@@ -752,13 +992,17 @@
           hour: '2-digit', minute: '2-digit', second: '2-digit'
         });
 
-        tampilStatus(
-          '✅ Absensi telah dikirim.\n\n' +
-          'Status: ' + data.statusAbsen + ' - ' + data.detailAbsen + '\n' +
-          'Tanggal: ' + tanggalAbsen + '\n' +
-          'Jam: ' + jamAbsen,
-          'success'
-        );
+        const statusTerakhir = {
+          judul: 'Absensi telah dikirim',
+          status: data.statusAbsen + ' - ' + data.detailAbsen,
+          tanggal: tanggalAbsen,
+          jam: jamAbsen
+        };
+
+        localStorage.setItem('absen_status_terakhir', JSON.stringify(statusTerakhir));
+        tampilkanStatusTerakhir();
+
+        tampilStatus('Absensi berhasil dikirim.', 'success');
 
         fotoBase64 = null;
         lokasiTerakhir = null;
