@@ -106,16 +106,6 @@
       color: #0f172a;
     }
 
-    .btn-danger {
-      background: #dc2626;
-      color: white;
-    }
-
-    .btn-light {
-      background: #f8fafc;
-      color: #334155;
-      border: 1px solid #e2e8f0;
-    }
 
     video, canvas, img {
       width: 100%;
@@ -160,12 +150,13 @@
 
     .note {
       margin-top: 10px;
-      font-size: 12px;
+      font-size: 11px;
       color: #64748b;
       line-height: 1.5;
     }
 
     .gps-box {
+      position: relative;
       display: grid;
       gap: 8px;
       margin-top: 10px;
@@ -244,9 +235,10 @@
       width: 100%;
       max-width: 480px;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      padding: 10px 14px 14px;
+      grid-template-columns: repeat(3, auto);
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 10px 10px;
       background: rgba(255,255,255,.96);
       border-top: 1px solid #e2e8f0;
       box-shadow: 0 -8px 20px rgba(15, 23, 42, .08);
@@ -255,12 +247,21 @@
 
     .menu-btn {
       margin: 0;
-      padding: 13px 8px;
-      border-radius: 16px;
+      min-width: 88px;
+      padding: 7px 5px 6px;
+      border-radius: 14px;
       background: #f8fafc;
       color: #334155;
       border: 1px solid #e2e8f0;
-      font-size: 13px;
+      font-size: 12px;
+      line-height: 1.15;
+    }
+
+    .menu-btn .icon {
+      display: block;
+      font-size: 24px;
+      line-height: 1;
+      margin-bottom: 2px;
     }
 
     .menu-btn.active {
@@ -291,9 +292,6 @@
       z-index: 5;
     }
 
-    .gps-box {
-      position: relative;
-    }
 
     .gps-refresh {
       position: absolute;
@@ -357,9 +355,6 @@
       color: #b91c1c;
     }
 
-    .last-status .status-time {
-      display: none;
-    }
 
     .welcome-box .hello {
       font-size: 12px;
@@ -368,9 +363,11 @@
     }
 
     .welcome-box .name {
-      font-size: 20px;
-      font-weight: 900;
+      font-size: 16px;
+      font-weight: 800;
       margin-top: 3px;
+      padding-right: 150px;
+      line-height: 1.25;
     }
 
     .welcome-box .meta {
@@ -421,16 +418,15 @@
         <div id="lastStatusBox" class="last-status hidden">
         <span id="lastStatusLine1" class="status-main">-</span>
         <span id="lastStatusLine2" class="status-sub">-</span>
-        <span id="lastStatusLine3" class="status-time">-</span>
         </div>
       </div>
 
       <h3 class="small-title">Form Absensi</h3>
 
       <div class="menu-grid">
-        <button type="button" id="menuDatang" class="menu-btn active" onclick="pilihMenuAbsen('Datang')">Datang</button>
-        <button type="button" id="menuPulang" class="menu-btn" onclick="pilihMenuAbsen('Pulang')">Pulang</button>
-        <button type="button" id="menuLainnya" class="menu-btn" onclick="pilihMenuAbsen('Keterangan')">Keterangan</button>
+        <button type="button" id="menuDatang" class="menu-btn active" onclick="pilihMenuAbsen('Datang')"><span class="icon" style="color:#eab308">⮞</span>Datang</button>
+        <button type="button" id="menuPulang" class="menu-btn" onclick="pilihMenuAbsen('Pulang')"><span class="icon" style="color:#dc2626">⮜</span>Pulang</button>
+        <button type="button" id="menuLainnya" class="menu-btn" onclick="pilihMenuAbsen('Keterangan')"><span class="icon">☰</span>Keterangan</button>
       </div>
 
       <input id="nama" type="hidden" />
@@ -503,7 +499,7 @@
     let sedangKirim = false;
     let menuAbsenAktif = 'Datang';
     let pegawaiAktif = null;
-    const LINK_FORM_REGISTER = '#';
+    const LINK_FORM_REGISTER = 'https://tally.so/r/RGVzZ4';
 
     const pilihanDetail = {
       Datang: ['Dinas Pagi', 'Dinas Sore', 'Dinas Malam', 'Tugas Luar'],
@@ -572,7 +568,6 @@
       const box = document.getElementById('lastStatusBox');
       const line1 = document.getElementById('lastStatusLine1');
       const line2 = document.getElementById('lastStatusLine2');
-      const line3 = document.getElementById('lastStatusLine3');
 
       if (!saved) {
         box.classList.add('hidden');
@@ -583,13 +578,11 @@
         const data = JSON.parse(saved);
         line1.textContent = 'Terkirim : ' + data.tanggal + ' ' + data.jam;
         line2.textContent = 'Status : ' + data.status;
-        line3.textContent = '';
       } catch (err) {
         // Jika masih tersimpan format lama, hapus agar tidak tampil berantakan
         localStorage.removeItem('absen_status_terakhir');
         line1.textContent = '';
         line2.textContent = '';
-        line3.textContent = '';
         box.classList.add('hidden');
         return;
       }
@@ -668,11 +661,16 @@
       document.getElementById('menuLainnya').classList.toggle('active', menu === 'Keterangan');
 
       const select = document.getElementById('detailAbsen');
-      select.innerHTML = '<option value="">-- Pilih Detail --</option>';
-      pilihanDetail[menu].forEach(item => {
+      select.innerHTML = '';
+      pilihanDetail[menu].forEach((item, index) => {
         const opt = document.createElement('option');
         opt.value = item;
         opt.textContent = item;
+
+        if ((menu === 'Datang' || menu === 'Pulang') && index === 0) {
+          opt.selected = true;
+        }
+
         select.appendChild(opt);
       });
 
@@ -760,9 +758,7 @@
           hour: '2-digit', minute: '2-digit', second: '2-digit'
         });
 
-        const statusTerakhir = {
-          judul: 'Keterangan telah dikirim',
-          status: data.detailAbsen,
+        const statusTerakhir = {          status: data.detailAbsen,
           tanggal: tanggal,
           jam: jam
         };
@@ -874,10 +870,6 @@
       tampilStatus('Foto berhasil diambil. Silakan ambil GPS lalu kirim absensi.', 'warning');
     }
 
-    function kembaliKeKamera() {
-      document.getElementById('previewArea').classList.add('hidden');
-      bukaKamera();
-    }
 
     function ambilUlang() {
       fotoBase64 = null;
@@ -992,9 +984,7 @@
           hour: '2-digit', minute: '2-digit', second: '2-digit'
         });
 
-        const statusTerakhir = {
-          judul: 'Absensi telah dikirim',
-          status: data.statusAbsen + ' - ' + data.detailAbsen,
+        const statusTerakhir = {          status: data.statusAbsen + ' - ' + data.detailAbsen,
           tanggal: tanggalAbsen,
           jam: jamAbsen
         };
