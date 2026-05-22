@@ -208,6 +208,92 @@
       text-transform: uppercase;
       letter-spacing: .5px;
     }
+
+    .time-box {
+      background: #ecfdf5;
+      border: 1px solid #bbf7d0;
+      color: #064e3b;
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    .time-box .date {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .time-box .clock {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-top: 3px;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 10px 0 12px;
+    }
+
+    .menu-btn {
+      margin: 0;
+      padding: 13px 8px;
+      border-radius: 16px;
+      background: #f8fafc;
+      color: #334155;
+      border: 1px solid #e2e8f0;
+      font-size: 13px;
+    }
+
+    .menu-btn.active {
+      background: #0f766e;
+      color: white;
+      border-color: #0f766e;
+      box-shadow: 0 8px 16px rgba(15, 118, 110, .22);
+    }
+
+    .photo-box {
+      position: relative;
+    }
+
+    .mini-action {
+      position: absolute;
+      top: 20px;
+      right: 10px;
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      margin: 0;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, .78);
+      color: white;
+      font-size: 20px;
+      font-weight: 900;
+      box-shadow: 0 6px 14px rgba(0,0,0,.25);
+      z-index: 5;
+    }
+
+    .gps-box {
+      position: relative;
+    }
+
+    .gps-refresh {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      margin: 0;
+      border-radius: 50%;
+      background: #0f766e;
+      color: white;
+      font-size: 16px;
+      z-index: 5;
+    }
   </style>
 </head>
 
@@ -219,26 +305,29 @@
     </div>
 
     <div id="formArea" class="card">
-      <h3 class="small-title">Form Absensi</h3>
+      <div class="time-box">
+        <div class="date" id="tanggalHariIni">-</div>
+        <div class="clock" id="jamHariIni">--:--:--</div>
+      </div>
+
+      <h3 class="small-title">Pilih Alur Absensi</h3>
+
+      <div class="menu-grid">
+        <button type="button" id="menuDatang" class="menu-btn active" onclick="pilihMenuAbsen('Datang')">Datang</button>
+        <button type="button" id="menuPulang" class="menu-btn" onclick="pilihMenuAbsen('Pulang')">Pulang</button>
+        <button type="button" id="menuLainnya" class="menu-btn" onclick="pilihMenuAbsen('Keterangan')">Keterangan</button>
+      </div>
 
       <label>Nama Pegawai</label>
       <input id="nama" type="text" placeholder="Masukkan nama lengkap" autocomplete="name" />
 
-      <label>Status Absensi</label>
-      <select id="statusAbsen">
-        <option value="">-- Pilih Status --</option>
-        <option value="Datang">Datang</option>
-        <option value="Pulang">Pulang</option>
-        <option value="Libur">Libur</option>
-        <option value="Dinas Luar">Dinas Luar</option>
-        <option value="Dinas Sore">Dinas Sore</option>
-        <option value="Dinas Malam">Dinas Malam</option>
-      </select>
+      <label id="labelDetailAbsen">Jenis Dinas / Kegiatan</label>
+      <select id="detailAbsen"></select>
 
       <label>Keterangan / Lokasi Tugas</label>
       <textarea id="keterangan" rows="2" placeholder="Opsional, contoh: Posyandu / UGD / Piket malam"></textarea>
 
-      <button class="btn-main" onclick="bukaKamera()">Buka Kamera</button>
+      <button id="btnMulaiAbsen" class="btn-main" onclick="prosesAwalAbsensi()">Lanjut Ambil Foto</button>
 
       <div class="note">
         Versi asli: tidak memakai foto dummy dan tidak memakai GPS simulasi. Jika kamera atau GPS gagal, absensi tidak dikirim.
@@ -246,6 +335,10 @@
     </div>
 
     <div id="cameraArea" class="card hidden">
+      <div class="time-box">
+        <div class="date currentDateText">-</div>
+        <div class="clock currentClockText">--:--:--</div>
+      </div>
       <h3 class="small-title">Ambil Foto</h3>
       <div class="camera-wrap">
         <video id="video" autoplay playsinline muted></video>
@@ -256,20 +349,27 @@
     </div>
 
     <div id="previewArea" class="card hidden">
+      <div class="time-box">
+        <div class="date currentDateText">-</div>
+        <div class="clock currentClockText">--:--:--</div>
+      </div>
       <h3 class="small-title">Pratinjau & GPS</h3>
-      <img id="previewFoto" alt="Foto absensi" />
+      <div class="photo-box">
+        <img id="previewFoto" alt="Foto absensi" />
+        <button class="mini-action" onclick="ambilUlang()" title="Ambil ulang foto">↻</button>
+      </div>
       <canvas id="canvas"></canvas>
 
       <div class="gps-box">
+        <button id="btnUlangGps" class="gps-refresh hidden" onclick="ambilGPSManual()" title="Ambil ulang GPS">↻</button>
         <div class="row"><span>Status GPS</span><span id="gpsStatus">Belum diambil</span></div>
         <div class="row"><span>Latitude</span><span id="gpsLat">-</span></div>
         <div class="row"><span>Longitude</span><span id="gpsLng">-</span></div>
         <div class="row"><span>Akurasi</span><span id="gpsAcc">-</span></div>
       </div>
 
-      <button class="btn-light" onclick="ambilGPSManual()">Ambil / Perbarui GPS</button>
-      <button id="btnKirim" class="btn-main" onclick="kirimAbsensi()">Kirim Absensi</button>
-      <button class="btn-danger" onclick="ambilUlang()">Ambil Ulang Foto</button>
+      <button id="btnGps" class="btn-main" onclick="ambilGPSManual()">Ambil Lokasi GPS</button>
+      <button id="btnKirim" class="btn-main hidden" onclick="kirimAbsensi()">Kirim Absensi</button>
     </div>
 
     <div id="statusBox" class="status hidden"></div>
@@ -284,16 +384,79 @@
     let fotoBase64 = null;
     let lokasiTerakhir = null;
     let sedangKirim = false;
+    let menuAbsenAktif = 'Datang';
+
+    const pilihanDetail = {
+      Datang: ['Dinas Pagi', 'Dinas Sore', 'Dinas Malam', 'Tugas Luar'],
+      Pulang: ['Dinas Pagi', 'Dinas Sore', 'Dinas Malam', 'Tugas Luar'],
+      Keterangan: ['Libur', 'Sakit', 'Tugas Luar', 'Dinas Sore', 'Dinas Malam']
+    };
 
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const previewFoto = document.getElementById('previewFoto');
     const statusBox = document.getElementById('statusBox');
     const btnKirim = document.getElementById('btnKirim');
+    const btnGps = document.getElementById('btnGps');
+    const btnUlangGps = document.getElementById('btnUlangGps');
 
-    window.onload = function () {
+    function mulaiAplikasi() {
       document.getElementById('nama').value = localStorage.getItem('absen_nama') || '';
-    };
+      pilihMenuAbsen('Datang');
+      updateJamTanggal();
+      setInterval(updateJamTanggal, 1000);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', mulaiAplikasi);
+    } else {
+      mulaiAplikasi();
+    }
+
+    function updateJamTanggal() {
+      const now = new Date();
+      const tanggal = now.toLocaleDateString('id-ID', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+      const jam = now.toLocaleTimeString('id-ID', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+
+      document.getElementById('tanggalHariIni').textContent = tanggal;
+      document.getElementById('jamHariIni').textContent = jam;
+
+      document.querySelectorAll('.currentDateText').forEach(el => el.textContent = tanggal);
+      document.querySelectorAll('.currentClockText').forEach(el => el.textContent = jam);
+    }
+
+    function pilihMenuAbsen(menu) {
+      menuAbsenAktif = menu;
+
+      document.getElementById('menuDatang').classList.toggle('active', menu === 'Datang');
+      document.getElementById('menuPulang').classList.toggle('active', menu === 'Pulang');
+      document.getElementById('menuLainnya').classList.toggle('active', menu === 'Keterangan');
+
+      const select = document.getElementById('detailAbsen');
+      select.innerHTML = '<option value="">-- Pilih Detail --</option>';
+      pilihanDetail[menu].forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        select.appendChild(opt);
+      });
+
+      document.getElementById('labelDetailAbsen').textContent = menu === 'Keterangan'
+        ? 'Status Keterangan'
+        : 'Jenis Dinas / Kegiatan';
+
+      const btnMulai = document.getElementById('btnMulaiAbsen');
+
+      if (menu === 'Keterangan') {
+        btnMulai.textContent = 'Kirim Keterangan';
+      } else {
+        btnMulai.textContent = 'Lanjut Ambil Foto';
+      }
+    }
 
     function tampilStatus(pesan, tipe = '') {
       statusBox.className = 'status ' + tipe;
@@ -307,6 +470,7 @@
         document.getElementById('gpsLat').textContent = '-';
         document.getElementById('gpsLng').textContent = '-';
         document.getElementById('gpsAcc').textContent = '-';
+        if (btnUlangGps) btnUlangGps.classList.add('hidden');
         return;
       }
 
@@ -314,19 +478,81 @@
       document.getElementById('gpsLat').textContent = lokasi.latitude;
       document.getElementById('gpsLng').textContent = lokasi.longitude;
       document.getElementById('gpsAcc').textContent = Math.round(lokasi.accuracy) + ' meter';
+      if (btnUlangGps) btnUlangGps.classList.remove('hidden');
+    }
+
+    function prosesAwalAbsensi() {
+      if (!validasiForm()) return;
+
+      if (menuAbsenAktif === 'Keterangan') {
+        kirimKeteranganLangsung();
+        return;
+      }
+
+      bukaKamera();
+    }
+
+    async function kirimKeteranganLangsung() {
+      try {
+        const data = {
+          nama: document.getElementById('nama').value.trim(),
+          statusAbsen: 'Keterangan',
+          detailAbsen: document.getElementById('detailAbsen').value,
+          keterangan: document.getElementById('keterangan').value.trim(),
+          fotoBase64: '',
+          latitude: '',
+          longitude: '',
+          accuracy: '',
+          timestampClient: new Date().toISOString()
+        };
+
+        tampilStatus('Mengirim keterangan...', 'warning');
+
+        await fetch(WEB_APP_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify(data)
+        });
+
+        const now = new Date();
+        const tanggal = now.toLocaleDateString('id-ID', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+
+        const jam = now.toLocaleTimeString('id-ID', {
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+
+        tampilStatus(
+          '✅ Keterangan berhasil dikirim.\n\n' +
+          'Status: ' + data.detailAbsen + '\n' +
+          'Tanggal: ' + tanggal + '\n' +
+          'Jam: ' + jam,
+          'success'
+        );
+
+        document.getElementById('keterangan').value = '';
+        pilihMenuAbsen('Datang');
+
+      } catch (err) {
+        tampilStatus('❌ Gagal mengirim keterangan.', 'error');
+      }
     }
 
     function validasiForm() {
       const nama = document.getElementById('nama').value.trim();
-      const statusAbsen = document.getElementById('statusAbsen').value;
+      const detailAbsen = document.getElementById('detailAbsen').value;
 
       if (!nama) {
         alert('Nama pegawai wajib diisi.');
         return false;
       }
 
-      if (!statusAbsen) {
-        alert('Status absensi wajib dipilih.');
+      if (!detailAbsen) {
+        alert('Pilih detail absensi terlebih dahulu.');
         return false;
       }
 
@@ -352,6 +578,7 @@
         document.getElementById('formArea').classList.add('hidden');
         document.getElementById('cameraArea').classList.remove('hidden');
         document.getElementById('previewArea').classList.add('hidden');
+        updateJamTanggal();
         statusBox.classList.add('hidden');
       } catch (err) {
         tampilStatus('❌ Kamera gagal dibuka.\nPastikan browser mengizinkan kamera dan halaman dibuka melalui HTTPS.', 'error');
@@ -378,7 +605,19 @@
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, w, h);
 
-      fotoBase64 = canvas.toDataURL('image/jpeg', 0.72);
+      // Kecilkan foto sebelum dikirim agar ringan dan cukup sebagai thumbnail absensi
+      const maxW = 240;
+      const ratio = w / h;
+      const thumbW = maxW;
+      const thumbH = Math.round(maxW / ratio);
+
+      const thumbCanvas = document.createElement('canvas');
+      thumbCanvas.width = thumbW;
+      thumbCanvas.height = thumbH;
+      const thumbCtx = thumbCanvas.getContext('2d');
+      thumbCtx.drawImage(canvas, 0, 0, thumbW, thumbH);
+
+      fotoBase64 = thumbCanvas.toDataURL('image/jpeg', 0.55);
       previewFoto.src = fotoBase64;
 
       if (stream) {
@@ -388,10 +627,19 @@
 
       lokasiTerakhir = null;
       setGpsUI(null);
+      btnKirim.classList.add('hidden');
+      btnGps.classList.remove('hidden');
+      if (btnUlangGps) btnUlangGps.classList.add('hidden');
 
       document.getElementById('cameraArea').classList.add('hidden');
       document.getElementById('previewArea').classList.remove('hidden');
+      updateJamTanggal();
       tampilStatus('Foto berhasil diambil. Silakan ambil GPS lalu kirim absensi.', 'warning');
+    }
+
+    function kembaliKeKamera() {
+      document.getElementById('previewArea').classList.add('hidden');
+      bukaKamera();
     }
 
     function ambilUlang() {
@@ -435,6 +683,11 @@
       try {
         lokasiTerakhir = await ambilGPS();
         setGpsUI(lokasiTerakhir);
+
+        btnGps.classList.add('hidden');
+        btnKirim.classList.remove('hidden');
+        if (btnUlangGps) btnUlangGps.classList.remove('hidden');
+
         tampilStatus('✅ GPS berhasil diambil. Sekarang absensi bisa dikirim.', 'success');
       } catch (err) {
         lokasiTerakhir = null;
@@ -470,19 +723,19 @@
 
         const data = {
           nama: document.getElementById('nama').value.trim(),
-          statusAbsen: document.getElementById('statusAbsen').value,
+          statusAbsen: menuAbsenAktif,
+          detailAbsen: document.getElementById('detailAbsen').value,
           keterangan: document.getElementById('keterangan').value.trim(),
           fotoBase64: fotoBase64,
           latitude: lokasiTerakhir.latitude,
           longitude: lokasiTerakhir.longitude,
           accuracy: lokasiTerakhir.accuracy,
-          userAgent: navigator.userAgent,
           timestampClient: new Date().toISOString()
         };
 
         tampilStatus('Mengirim absensi ke server...', 'warning');
 
-        const response = await fetch(WEB_APP_URL, {
+        await fetch(WEB_APP_URL, {
           method: 'POST',
           mode: 'no-cors',
           headers: {
@@ -491,21 +744,31 @@
           body: JSON.stringify(data)
         });
 
-        // Pada mode no-cors, browser tidak bisa membaca isi response.
-        // Jika fetch tidak error, data dianggap sudah dikirim ke Apps Script.
+        const waktuAbsen = new Date();
+        const tanggalAbsen = waktuAbsen.toLocaleDateString('id-ID', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+        const jamAbsen = waktuAbsen.toLocaleTimeString('id-ID', {
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+
         tampilStatus(
           '✅ Absensi telah dikirim.\n\n' +
-          'Status: ' + data.statusAbsen + '\n' +
-          'GPS: ' + data.latitude + ', ' + data.longitude,
+          'Status: ' + data.statusAbsen + ' - ' + data.detailAbsen + '\n' +
+          'Tanggal: ' + tanggalAbsen + '\n' +
+          'Jam: ' + jamAbsen,
           'success'
         );
 
         fotoBase64 = null;
         lokasiTerakhir = null;
         setGpsUI(null);
+
+        btnKirim.classList.add('hidden');
+        btnGps.classList.remove('hidden');
         document.getElementById('previewArea').classList.add('hidden');
         document.getElementById('formArea').classList.remove('hidden');
-        document.getElementById('statusAbsen').value = '';
+        pilihMenuAbsen('Datang');
         document.getElementById('keterangan').value = '';
       } catch (err) {
         tampilStatus('❌ Gagal mengirim absensi.\nPeriksa koneksi internet atau link Web App.', 'error');
