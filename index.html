@@ -532,7 +532,7 @@
     let sedangKirim = false;
     let menuAbsenAktif = 'Datang';
     let pegawaiAktif = null;
-    const LINK_FORM_REGISTER = 'Silahkan Hubungi Admin';
+    const LINK_FORM_REGISTER = 'https://tally.so/r/RGVzZ4';
 
     const jadwalDinas = {
       Datang: [
@@ -548,9 +548,9 @@
       Keterangan: [
         { nama: 'Libur' },
         { nama: 'Sakit' },
-        { nama: 'Informasi Dinas Luar' },
-        { nama: 'Dinas Malam' },
-        { nama: 'Dinas Sore' }
+        { nama: 'Dinas Luar' },
+        { nama: 'Dinas Sore' },
+        { nama: 'Dinas Malam' }
       ]
     };
 
@@ -719,7 +719,7 @@
           tampilkanFormAbsensi();
         } else {
           box.className = 'status error';
-          box.innerHTML = (res && res.pesan ? res.pesan : 'ID Pegawai belum terdaftar.') + '<br><br><a href="' + LINK_FORM_REGISTER + '" target="_blank">Silahkan Hubungi Admin</a>';
+          box.innerHTML = (res && res.pesan ? res.pesan : 'ID Pegawai belum terdaftar.') + '<br><br><a href="' + LINK_FORM_REGISTER + '" target="_blank">Buka Form Register Pegawai</a>';
         }
       };
 
@@ -775,71 +775,81 @@
     }
 
     function infoJenisDinas() {
-      let pesan = '';
+      let baris = [];
 
       if (menuAbsenAktif === 'Datang') {
-
-        pesan =
-          'Informasi Absensi Datang:\n\n' +
-          'Pilihan jenis dinas akan muncul sesuai jam absensi yang dibuka.\n\n' +
-          'Mulai dibuka:\n' +
-          '- Dinas Pagi : 07.15\n' +
-          '- Dinas Sore : 13.45\n' +
-          '- Dinas Malam : 19.45\n\n' +
-          'Dinas Luar tetap tersedia setiap saat.';
-
+        baris = [
+          'Informasi Absensi Datang:',
+          '',
+          'Pilihan jenis dinas akan muncul sesuai jam absensi yang dibuka.',
+          '',
+          'Mulai dibuka:',
+          '- Dinas Pagi : 07.15',
+          '- Dinas Sore : 13.45',
+          '- Dinas Malam : 19.45',
+          '',
+          'Dinas Luar tetap tersedia setiap saat.'
+        ];
       } else if (menuAbsenAktif === 'Pulang') {
-
-        pesan =
-          'Informasi Absensi Pulang:\n\n' +
-          'Pilihan jenis dinas akan muncul sesuai jam absensi yang dibuka.\n\n' +
-          'Mulai dibuka:\n' +
-          '- Dinas Pagi : 11.30\n' +
-          '- Dinas Sore : 20.00\n' +
-          '- Dinas Malam : 08.00\n\n' +
-          'Dinas Luar tetap tersedia setiap saat.';
-
+        baris = [
+          'Informasi Absensi Pulang:',
+          '',
+          'Pilihan jenis dinas akan muncul sesuai jam absensi yang dibuka.',
+          '',
+          'Mulai dibuka:',
+          '- Dinas Pagi : 11.30',
+          '- Dinas Sore : 20.00',
+          '- Dinas Malam : 08.00',
+          '',
+          'Dinas Luar tetap tersedia setiap saat.'
+        ];
       } else {
-
-        pesan =
-          'Informasi Status Keterangan:\n\n' +
-          'Status Keterangan hanya dapat diisi pukul 00.01 - 08.00 dan hanya satu kali dalam sehari.\n\n' +
-          'Pilihan status:\n' +
-          '- Libur\n' +
-          '- Sakit\n' +
-          '- Informasi Dinas Luar\n' +
-          '- Dinas Malam\n' +
-          '- Dinas Sore';
-
+        baris = [
+          'Informasi Status Keterangan:',
+          '',
+          'Status Keterangan hanya dapat diisi pukul 00.01 - 08.00 dan hanya satu kali dalam sehari.',
+          '',
+          'Pilihan status:',
+          '- Libur',
+          '- Sakit',
+          '- Dinas Luar',
+          '- Dinas Sore',
+          '- Dinas Malam'
+        ];
       }
 
-      alert(pesan);
+      alert(baris.join('\n'));
     }
 
     function infoKeterangan() {
-      let pesan = '';
+      let baris = [];
 
       if (menuAbsenAktif === 'Datang') {
-        pesan =
-          'Keterangan saat Datang diisi dengan lokasi atau tujuan tugas.\n\n' +
-          'Contoh: Posyandu Teratai 1, UGD, Loket, atau Kunjungan rumah.';
+        baris = [
+          'Keterangan saat Datang diisi dengan lokasi atau tujuan tugas.',
+          '',
+          'Contoh: Posyandu Teratai 1, UGD, Loket, atau Kunjungan rumah.'
+        ];
       } else if (menuAbsenAktif === 'Pulang') {
-        pesan =
-          'Keterangan saat Pulang diisi dengan hasil kegiatan berupa data kuantitas atau ringkasan layanan.\n\n' +
-          'Contoh:\n' +
-          '- Pelayanan 32 pasien\n' +
-          '- Posyandu 18 sasaran\n' +
-          '- Imunisasi 12 anak\n' +
-          '- Kunjungan rumah 5 pasien';
+        baris = [
+          'Keterangan saat Pulang diisi dengan hasil kegiatan berupa data kuantitas atau ringkasan layanan.',
+          '',
+          'Contoh:',
+          '- Pelayanan 32 pasien',
+          '- Posyandu 18 sasaran',
+          '- Imunisasi 12 anak',
+          '- Kunjungan rumah 5 pasien'
+        ];
       } else {
-        pesan =
-          'Kolom keterangan dapat diisi contoh seperti:\n' +
-          '- Lepas Malam\n' +
-          '- Libur P3K\n' +
-          '- Libur Jaga Malam';
+        baris = [
+          'Kolom keterangan dapat diisi contoh seperti:',
+          '- Lepas Malam',
+          '- Libur P3K',
+          '- Libur Jaga Malam'
+        ];
       }
 
-      alert(pesan);
+      alert(baris.join('\n'));
     }
 
     function bolehIsiKeterangan() {
@@ -865,32 +875,8 @@
       const btnMulai = document.getElementById('btnMulaiAbsen');
       if (!select || !btnMulai) return;
 
-      // Pembatasan khusus menu Keterangan
-      if (menuAbsenAktif === 'Keterangan' && !bolehIsiKeterangan()) {
-        select.innerHTML = '';
-
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'Keterangan hanya dapat dikirim pukul 00.01 - 08.00 sekali sehari';
-        select.appendChild(opt);
-
-        select.disabled = true;
-        btnMulai.disabled = true;
-        return;
-      }
-
       const pilihan = pilihanAktifBerdasarkanJam(menuAbsenAktif);
       select.innerHTML = '';
-
-      if (pilihan.length === 0) {
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'Tidak ada pilihan absensi saat ini';
-        select.appendChild(opt);
-        select.disabled = true;
-        btnMulai.disabled = true;
-        return;
-      }
 
       pilihan.forEach((item, index) => {
         const opt = document.createElement('option');
@@ -900,8 +886,21 @@
         select.appendChild(opt);
       });
 
+      // Dropdown tetap aktif agar status tetap bisa terlihat/dipilih.
       select.disabled = false;
+
+      // Khusus menu Keterangan: pilihan tetap dropdown,
+      // tetapi tombol kirim hanya aktif pukul 00.01 - 08.00 dan sekali sehari.
+      if (menuAbsenAktif === 'Keterangan' && !bolehIsiKeterangan()) {
+        btnMulai.disabled = true;
+        btnMulai.textContent = 'Keterangan dibuka 00.01 - 08.00';
+        return;
+      }
+
       btnMulai.disabled = false;
+      btnMulai.textContent = menuAbsenAktif === 'Keterangan'
+        ? 'Kirim Keterangan'
+        : 'Lanjut Ambil Foto';
     }
 
     function tampilStatus(pesan, tipe = '') {
