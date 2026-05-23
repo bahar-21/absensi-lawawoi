@@ -532,7 +532,7 @@
     let sedangKirim = false;
     let menuAbsenAktif = 'Datang';
     let pegawaiAktif = null;
-    const LINK_FORM_REGISTER = 'https://tally.so/r/RGVzZ4';
+    const LINK_FORM_REGISTER = 'Silahkan Hubungi Admin';
 
     const jadwalDinas = {
       Datang: [
@@ -719,7 +719,7 @@
           tampilkanFormAbsensi();
         } else {
           box.className = 'status error';
-          box.innerHTML = (res && res.pesan ? res.pesan : 'ID Pegawai belum terdaftar.') + '<br><br><a href="' + LINK_FORM_REGISTER + '" target="_blank">Buka Form Register Pegawai</a>';
+          box.innerHTML = (res && res.pesan ? res.pesan : 'ID Pegawai belum terdaftar.') + '<br><br><a href="' + LINK_FORM_REGISTER + '" target="_blank">Silahkan Hubungi Admin</a>';
         }
       };
 
