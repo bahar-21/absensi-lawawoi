@@ -532,6 +532,7 @@
     let sedangKirim = false;
     let menuAbsenAktif = 'Datang';
     let pegawaiAktif = null;
+    let menitDropdownTerakhir = null;
     const LINK_FORM_REGISTER = 'https://tally.so/r/RGVzZ4';
 
     const jadwalDinas = {
@@ -621,8 +622,14 @@
       document.querySelectorAll('.currentDateText').forEach(el => el.textContent = tanggal);
       document.querySelectorAll('.currentClockText').forEach(el => el.textContent = jam);
 
-      if (document.getElementById('formArea') && !document.getElementById('formArea').classList.contains('hidden')) {
-        isiPilihanDetailBerdasarkanJam();
+      const menitAktif = now.getHours() * 60 + now.getMinutes();
+      if (
+        menitDropdownTerakhir !== menitAktif &&
+        document.getElementById('formArea') &&
+        !document.getElementById('formArea').classList.contains('hidden')
+      ) {
+        menitDropdownTerakhir = menitAktif;
+        isiPilihanDetailBerdasarkanJam(true);
       }
     }
 
@@ -754,7 +761,8 @@
       }
 
       updateLabelKeterangan();
-      isiPilihanDetailBerdasarkanJam();
+      menitDropdownTerakhir = null;
+      isiPilihanDetailBerdasarkanJam(false);
     }
 
     function updateLabelKeterangan() {
@@ -870,21 +878,29 @@
       return terakhir !== tanggalHariIni;
     }
 
-    function isiPilihanDetailBerdasarkanJam() {
+    function isiPilihanDetailBerdasarkanJam(pertahankanPilihan = true) {
       const select = document.getElementById('detailAbsen');
       const btnMulai = document.getElementById('btnMulaiAbsen');
       if (!select || !btnMulai) return;
 
+      const pilihanLama = select.value;
       const pilihan = pilihanAktifBerdasarkanJam(menuAbsenAktif);
       select.innerHTML = '';
 
-      pilihan.forEach((item, index) => {
+      pilihan.forEach((item) => {
         const opt = document.createElement('option');
         opt.value = item;
         opt.textContent = item;
-        if (index === 0) opt.selected = true;
         select.appendChild(opt);
       });
+
+      // Jika pengguna sudah memilih Dinas Luar atau pilihan lain yang masih tersedia,
+      // jangan dikembalikan ke default saat jam berdetik.
+      if (pertahankanPilihan && pilihan.includes(pilihanLama)) {
+        select.value = pilihanLama;
+      } else {
+        select.value = pilihan[0] || '';
+      }
 
       // Dropdown tetap aktif agar status tetap bisa terlihat/dipilih.
       select.disabled = false;
