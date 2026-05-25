@@ -287,15 +287,16 @@
 
     .header-menu-panel {
       position: absolute;
-      top: 34px;
-      right: 0;
-      width: 132px;
+      top: 30px;
+      left: 0;
+      width: 138px;
       padding: 7px 0;
       border-radius: 14px;
       background: #ffffff;
       box-shadow: 0 12px 24px rgba(15,23,42,.16);
       border: 1px solid #e2e8f0;
       overflow: hidden;
+      max-width: calc(100vw - 40px);
     }
 
     .header-menu-item {
@@ -348,7 +349,8 @@
       display: flex;
       justify-content: flex-start;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      position: relative;
       min-width: 0;
     }
 
@@ -1927,10 +1929,12 @@
             UI.setStatus('Data kehadiran berhasil dikirim.', 'success');
             UI.tampilkanFormAbsensi();
             UI.renderStatusHariIni();
-            setTimeout(() => {
-              STATE.baruSajaKirim = false;
-              this.cekRiwayatTerakhir(false);
-            }, 2500);
+            setTimeout(() => UI.clearStatus(), 1200);
+
+            // Jangan refresh server otomatis setelah kirim sukses.
+            // Ringkasan Datang/Pulang harus tetap mengikuti data yang baru dikirim,
+            // supaya pesan Pulang tidak hilang sebelum tombol OK diklik.
+            STATE.baruSajaKirim = false;
           } else {
             UI.setStatus((res && res.pesan) ? res.pesan : 'Absensi gagal dikirim.', 'error');
           }
@@ -1948,7 +1952,7 @@
         STORAGE.resetAbsensiHariIni();
         ENGINE.setMode('Datang');
         UI.tampilkanFormAbsensi();
-        UI.setStatus('Absensi hari ini selesai dan tersimpan di riwayat lokal.', 'success');
+        UI.clearStatus();
       },
 
       async bukaRiwayatPegawai() {
