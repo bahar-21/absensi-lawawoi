@@ -147,6 +147,7 @@
     .hidden { display: none !important; }
 
     .status {
+      position: relative;
       margin-top: 14px;
       padding: 13px;
       border-radius: 13px;
@@ -173,6 +174,21 @@
       background: #fef3c7;
       color: #92400e;
       border-color: #fde68a;
+    }
+
+    .status-close {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      margin: 0;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, .12);
+      color: inherit;
+      font-size: 14px;
+      line-height: 1;
     }
 
     .note {
@@ -452,6 +468,38 @@
 
     
 
+    .quick-action-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: -8px 0 14px;
+    }
+
+    .quick-action-btn {
+      margin: 0;
+      padding: 9px 6px;
+      border-radius: 14px;
+      background: #f8fafc;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+      font-size: 12px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-height: 38px;
+    }
+
+    .quick-action-btn .ico {
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .quick-action-btn:active {
+      transform: scale(.98);
+    }
+
     .mini-icon-btn {
       position: absolute;
       top: 10px;
@@ -540,6 +588,65 @@
       font-size: 13px;
       font-weight: 800;
       color: #047857;
+    }
+
+    .riwayat-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .riwayat-card {
+      background: #ecfdf5;
+      border: 1px solid #99f6e4;
+      border-radius: 18px;
+      padding: 13px;
+      color: #134e4a;
+    }
+
+    .riwayat-card .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #0f766e;
+      color: white;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .3px;
+      margin-bottom: 7px;
+    }
+
+    .riwayat-card .title {
+      font-size: 15px;
+      font-weight: 900;
+      margin-bottom: 5px;
+    }
+
+    .riwayat-card .text {
+      font-size: 13px;
+      line-height: 1.55;
+      color: #334155;
+      white-space: pre-line;
+    }
+
+    .summary-action-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .summary-action-row .btn-main,
+    .summary-action-row .btn-secondary {
+      margin-top: 0;
+    }
+
+    .btn-refresh-status {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 18px;
     }
 
     .page-tabs {
@@ -670,6 +777,18 @@
       </div>
     </div>
 
+    <div class="quick-action-bar" id="quickActionBar">
+      <button type="button" class="quick-action-btn" onclick="cekUlangStatusAbsen()" title="Cek ulang status">
+        <span class="ico">↻</span><span>Refresh</span>
+      </button>
+      <button type="button" class="quick-action-btn" onclick="bukaRekapAbsensi()" title="Riwayat Absensi">
+        <span class="ico">🕘</span><span>Riwayat</span>
+      </button>
+      <button type="button" id="btnAdminPage" class="quick-action-btn hidden" onclick="bukaHalamanAdmin()" title="Halaman Admin">
+        <span class="ico">▦</span><span>Admin</span>
+      </button>
+    </div>
+
     <div id="registerArea" class="card hidden">
       <div class="time-box">
         <div class="clock currentClockText">--:--:--</div>
@@ -691,8 +810,6 @@
 
     <div id="formArea" class="card hidden">
       <div class="time-box">
-        <button type="button" class="mini-icon-btn" onclick="bukaRekapAbsensi()" title="Riwayat Absensi">🕘</button>
-        <button type="button" id="btnAdminPage" class="mini-icon-btn admin-open-btn" onclick="bukaHalamanAdmin()" title="Halaman Admin">▦</button>
         <div class="clock" id="jamHariIni">--:--:--</div>
         <div class="date" id="tanggalHariIni">-</div>
       </div>
@@ -839,7 +956,8 @@
   <script>
     // GANTI DENGAN LINK WEB APP APPS SCRIPT /exec
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby1H2Klg2I0jdV1uTRdscNoSEDbmWD7FvYGKEpJ-89uuDLez4jw4b6i407vXXI1Sq_f/exec';
-    const LINK_FORM_REGISTER = 'https://tally.so/r/RGVzZ4';
+    // Link register eksternal dihapus agar halaman tidak terlihat seperti phishing/login eksternal.
+    const LINK_FORM_REGISTER = ''; 
 
     let stream = null;
     let fotoBase64 = null;
@@ -960,6 +1078,7 @@
 
       document.getElementById('registerArea').classList.remove('hidden');
       document.getElementById('formArea').classList.add('hidden');
+      document.getElementById('quickActionBar')?.classList.add('hidden');
     }
 
     function tampilkanStatusTerakhir() {
@@ -969,6 +1088,7 @@
     function tampilkanFormAbsensi() {
       document.getElementById('registerArea').classList.add('hidden');
       document.getElementById('formArea').classList.remove('hidden');
+      document.getElementById('quickActionBar')?.classList.remove('hidden');
 
       document.getElementById('nama').value = pegawaiAktif.nama || '';
       document.getElementById('idPegawai').value = pegawaiAktif.idPegawai || pegawaiAktif.nik || '';
@@ -979,7 +1099,7 @@
       document.getElementById('metaPegawaiDisplay').textContent = (pegawaiAktif.jabatan || '-') + ' • ' + (pegawaiAktif.unit || '-');
       tampilkanStatusTerakhir();
       renderDummyAdmin();
-      tampilkanModeAbsensiHariIni();
+      cekRiwayatTerakhirAbsen();
     }
 
     function cekIdPegawai() {
@@ -997,39 +1117,31 @@
       box.textContent = 'Memeriksa ID Pegawai...';
       box.classList.remove('hidden');
 
-      const callbackName = 'hasilCekIdPegawai_' + Date.now();
+      fetch(WEB_APP_URL + '?aksi=cekNIK&nik=' + encodeURIComponent(idPegawai))
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.ditemukan) {
+            pegawaiAktif = {
+              idPegawai: res.idPegawai || res.ID_Pegawai || res.nik,
+              nik: res.idPegawai || res.ID_Pegawai || res.nik,
+              nama: res.nama,
+              jabatan: res.jabatan || '',
+              unit: res.unit || ''
+            };
 
-      window[callbackName] = function(res) {
-        delete window[callbackName];
-
-        if (res && res.ditemukan) {
-          pegawaiAktif = {
-            idPegawai: res.idPegawai || res.ID_Pegawai || res.nik,
-            nik: res.idPegawai || res.ID_Pegawai || res.nik,
-            nama: res.nama,
-            jabatan: res.jabatan || '',
-            unit: res.unit || ''
-          };
-
-          localStorage.setItem('absen_pegawai', JSON.stringify(pegawaiAktif));
-          box.className = 'status success';
-          box.textContent = 'ID Pegawai ditemukan. Perangkat ini sudah terkunci untuk ' + pegawaiAktif.nama + '.';
-          tampilkanFormAbsensi();
-        } else {
+            localStorage.setItem('absen_pegawai', JSON.stringify(pegawaiAktif));
+            box.className = 'status success';
+            box.textContent = 'ID Pegawai ditemukan. Perangkat ini sudah terkunci untuk ' + pegawaiAktif.nama + '.';
+            tampilkanFormAbsensi();
+          } else {
+            box.className = 'status error';
+            box.textContent = (res && res.pesan ? res.pesan : 'ID Pegawai belum terdaftar. Hubungi admin/operator.');
+          }
+        })
+        .catch(() => {
           box.className = 'status error';
-          box.innerHTML = (res && res.pesan ? res.pesan : 'ID Pegawai belum terdaftar.') + '<br><br><a href="' + LINK_FORM_REGISTER + '" target="_blank">Buka Form Register Pegawai</a>';
-        }
-      };
-
-      const script = document.createElement('script');
-      script.src = WEB_APP_URL + '?aksi=cekNIK&nik=' + encodeURIComponent(idPegawai) + '&callback=' + callbackName;
-      script.onerror = function() {
-        delete window[callbackName];
-        box.className = 'status error';
-        box.textContent = 'Gagal menghubungi server.';
-      };
-      document.body.appendChild(script);
-      setTimeout(() => script.remove(), 15000);
+          box.textContent = 'Gagal menghubungi server.';
+        });
     }
 
     function tanggalKeyHariIni() {
@@ -1116,10 +1228,141 @@
       localStorage.setItem(key, JSON.stringify(riwayat));
     }
 
-    function bukaRekapAbsensi() {
-      const area = document.getElementById('rekapArea');
+    function formatJamTampilan(nilai) {
+      if (!nilai) return '-';
+
+      const teks = String(nilai).trim();
+
+      // Jika jam dari Google Sheet tampil seperti:
+      // Sat Dec 30 1899 07:16:32 GMT+0757 (...)
+      // ambil bagian jamnya saja, tanpa konversi timezone browser.
+      const polaJamDiManaSaja = teks.match(/([0-9]{1,2}):([0-9]{2})(?::([0-9]{2}))?/);
+      if (polaJamDiManaSaja) {
+        const hh = String(polaJamDiManaSaja[1]).padStart(2, '0');
+        const mm = polaJamDiManaSaja[2];
+        const ss = polaJamDiManaSaja[3] || '00';
+        return hh + ':' + mm + ':' + ss;
+      }
+
+      return teks;
+    }
+
+    function escapeHTML(teks) {
+      return String(teks || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function kelompokkanRiwayatPasangan(riwayat) {
+      const hasil = [];
+
+      // Data dari server biasanya urut terbaru ke lama:
+      // Pulang dulu, lalu Datang. Karena itu pasangan dibuat dari Pulang
+      // kemudian mencari Datang terdekat setelahnya.
+      for (let i = 0; i < riwayat.length; i++) {
+        const item = riwayat[i] || {};
+        const status = String(item.statusAbsen || '').trim();
+
+        if (status === 'Pulang') {
+          const pulang = item;
+          let datang = null;
+
+          for (let j = i + 1; j < riwayat.length; j++) {
+            const kandidat = riwayat[j] || {};
+            if (String(kandidat.statusAbsen || '').trim() === 'Datang') {
+              datang = kandidat;
+              break;
+            }
+          }
+
+          if (datang) {
+            hasil.push({ datang, pulang });
+          }
+        }
+
+        // Jika riwayat terakhir adalah Datang dan belum ada Pulang setelahnya,
+        // tetap tampilkan sebagai belum pulang.
+        if (status === 'Datang') {
+          const sudahDipakai = hasil.some(p => p.datang === item);
+          if (!sudahDipakai) {
+            hasil.push({ datang: item, pulang: null });
+          }
+        }
+      }
+
+      return hasil;
+    }
+
+    function hitungDurasiJam(datang, pulang) {
+      try {
+        if (!datang || !pulang) return '-';
+
+        const jamDatang = formatJamTampilan(datang.jam).split(':').map(Number);
+        const jamPulang = formatJamTampilan(pulang.jam).split(':').map(Number);
+
+        const menitDatang = (jamDatang[0] * 60) + jamDatang[1];
+        const menitPulang = (jamPulang[0] * 60) + jamPulang[1];
+
+        let selisih = menitPulang - menitDatang;
+        if (selisih < 0) selisih += 24 * 60;
+
+        const jam = Math.floor(selisih / 60);
+        const menit = selisih % 60;
+
+        return jam + ' jam ' + menit + ' menit';
+      } catch (err) {
+        return '-';
+      }
+    }
+
+    function renderRiwayatPribadi(riwayat) {
       const content = document.getElementById('rekapContent');
 
+      if (!riwayat || !riwayat.length) {
+        content.className = 'status';
+        content.textContent = 'Belum ada riwayat absensi.';
+        return;
+      }
+
+      const pasangan = kelompokkanRiwayatPasangan(riwayat);
+
+      if (!pasangan.length) {
+        content.className = 'status';
+        content.textContent = 'Belum ada pasangan absensi datang/pulang.';
+        return;
+      }
+
+      content.className = 'riwayat-list';
+      content.innerHTML = pasangan.slice(0, 10).map((item) => {
+        const datang = item.datang || {};
+        const pulang = item.pulang || {};
+
+        const tanggal = datang.tanggal || '-';
+        const dinas = datang.detailAbsen || '-';
+        const jamDatang = formatJamTampilan(datang.jam);
+        const jamPulang = pulang.jam ? formatJamTampilan(pulang.jam) : '-';
+        const durasi = pulang.jam
+          ? hitungDurasiJam(datang, pulang)
+          : 'Belum absen pulang';
+
+        const isi = [
+          'Datang : ' + tanggal + ' ' + jamDatang,
+          'Pulang : ' + (pulang.tanggal || tanggal) + ' ' + jamPulang,
+          'Jam kerja : ' + durasi
+        ].join(String.fromCharCode(10));
+
+        return '<div class="riwayat-card">' +
+          '<span class="badge">' + escapeHTML(tanggal) + '</span>' +
+          '<div class="title">' + escapeHTML(dinas) + '</div>' +
+          '<div class="text">' + escapeHTML(isi) + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function renderRiwayatLokalFallback() {
       let riwayat = [];
 
       try {
@@ -1129,21 +1372,47 @@
       }
 
       if (!riwayat.length) {
-        content.textContent = 'Belum ada riwayat absensi.';
-      } else {
-        content.textContent = riwayat.slice(0,7).map((r, i) => {
-          return [
-            (i + 1) + '. ' + r.tanggal,
-            'Datang : ' + r.datang,
-            'Pulang : ' + r.pulang,
-            'Durasi : ' + r.durasi,
-            'Dinas : ' + r.dinas
-          ].join(String.fromCharCode(10));
-        }).join(String.fromCharCode(10) + String.fromCharCode(10));
+        renderRiwayatPribadi([]);
+        return;
       }
 
+      const data = riwayat.slice(0, 7).map((r) => ({
+        tanggal: r.tanggal,
+        statusAbsen: 'Datang/Pulang',
+        detailAbsen: r.dinas,
+        jam: formatJamTampilan(r.datang) + ' - ' + formatJamTampilan(r.pulang),
+        keterangan: 'Durasi: ' + (r.durasi || '-')
+      }));
+
+      renderRiwayatPribadi(data);
+    }
+
+    function bukaRekapAbsensi() {
+      const area = document.getElementById('rekapArea');
+      const content = document.getElementById('rekapContent');
+      const idPegawai = String(pegawaiAktif?.idPegawai || pegawaiAktif?.nik || '').trim();
+
       area.classList.remove('hidden');
+      content.textContent = 'Memuat riwayat absensi...';
       area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      if (!idPegawai) {
+        renderRiwayatLokalFallback();
+        return;
+      }
+
+      fetch(WEB_APP_URL + '?aksi=riwayatPegawai&idPegawai=' + encodeURIComponent(idPegawai))
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.sukses && Array.isArray(res.data)) {
+            renderRiwayatPribadi(res.data);
+          } else {
+            renderRiwayatLokalFallback();
+          }
+        })
+        .catch(() => {
+          renderRiwayatLokalFallback();
+        });
     }
 
     function tutupRekap() {
@@ -1231,30 +1500,22 @@
     function muatRekapAdminHariIni(paksaRefresh = false) {
       if (!paksaRefresh && pakaiCacheAdminJikaAda()) return;
 
-      const callbackName = 'hasilRekapAdmin_' + Date.now();
-
-      window[callbackName] = function(res) {
-        delete window[callbackName];
-
-        if (res && res.sukses && res.data) {
-          localStorage.setItem('admin_rekap_cache', JSON.stringify({
-            waktu: Date.now(),
-            data: res.data
-          }));
-          setAdminRekapData(res.data);
-        } else {
+      fetch(WEB_APP_URL + '?aksi=rekapHariIni')
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.sukses && res.data) {
+            localStorage.setItem('admin_rekap_cache', JSON.stringify({
+              waktu: Date.now(),
+              data: res.data
+            }));
+            setAdminRekapData(res.data);
+          } else {
+            setAdminRekapData({ total: [], hadir: [], dinas: [], libur: [], belum: [] });
+          }
+        })
+        .catch(() => {
           setAdminRekapData({ total: [], hadir: [], dinas: [], libur: [], belum: [] });
-        }
-      };
-
-      const script = document.createElement('script');
-      script.src = WEB_APP_URL + '?aksi=rekapHariIni&callback=' + callbackName;
-      script.onerror = function() {
-        delete window[callbackName];
-        setAdminRekapData({ total: [], hadir: [], dinas: [], libur: [], belum: [] });
-      };
-      document.body.appendChild(script);
-      setTimeout(() => script.remove(), 15000);
+        });
     }
 
     function bukaHalamanAdmin() {
@@ -1268,6 +1529,8 @@
 
       if (welcomeBox) welcomeBox.classList.add('hidden');
       if (timeBox) timeBox.classList.add('hidden');
+      document.getElementById('quickActionBar')?.classList.add('hidden');
+      tutupStatus();
       absensiPage.classList.add('hidden');
       rekapArea?.classList.add('hidden');
       adminPage.classList.remove('hidden');
@@ -1285,6 +1548,7 @@
 
       if (welcomeBox) welcomeBox.classList.remove('hidden');
       if (timeBox) timeBox.classList.remove('hidden');
+      document.getElementById('quickActionBar')?.classList.remove('hidden');
       adminPage.classList.add('hidden');
       absensiPage.classList.remove('hidden');
       document.querySelector('.app')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1332,6 +1596,92 @@
       console.assert({ statusAbsen: 'Pulang' }.statusAbsen === 'Pulang', 'Tes status Pulang gagal');
       console.assert(formatDurasiKerja(90 * 60000) === '1 jam 30 menit', 'Tes durasi kerja gagal');
       renderDummyAdmin();
+    }
+
+    function dataServerKeDataLokal(row) {
+      if (!row) return null;
+
+      return {
+        idPegawai: row.idPegawai || row.nik || document.getElementById('idPegawai')?.value || '',
+        nama: row.nama || document.getElementById('nama')?.value || '',
+        jabatan: document.getElementById('jabatanPegawai')?.value || '',
+        unit: document.getElementById('unitPegawai')?.value || '',
+        statusAbsen: row.statusAbsen || row.status || '',
+        detailAbsen: row.detailAbsen || row.detail || '',
+        keterangan: row.keterangan || '',
+        latitude: row.latitude || '',
+        longitude: row.longitude || '',
+        accuracy: row.accuracy || '',
+        timestampClient: row.timestampClient || row.timestampServer || new Date().toISOString()
+      };
+    }
+
+    function cekUlangStatusAbsen() {
+      tampilStatus('Memeriksa ulang status absensi...', 'warning');
+      resetAbsensiHariIni();
+      cekRiwayatTerakhirAbsen(true);
+    }
+
+    function teksStatusTerakhir(row) {
+      if (!row) return 'Tidak ada riwayat absensi Datang/Pulang yang tercatat.';
+
+      return [
+        'Riwayat terakhir ditemukan:',
+        'Status : ' + (row.statusAbsen || row.status || '-'),
+        'Dinas  : ' + (row.detailAbsen || row.detail || '-'),
+        'Tanggal: ' + (row.tanggal || '-'),
+        'Jam    : ' + formatJamTampilan(row.jam)
+      ].join(String.fromCharCode(10));
+    }
+
+    function fetchDenganTimeout(url, opsi = {}, timeoutMs = 8000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      return fetch(url, { ...opsi, signal: controller.signal })
+        .finally(() => clearTimeout(timer));
+    }
+
+    function cekRiwayatTerakhirAbsen(paksaCek = false) {
+      const idPegawai = String(pegawaiAktif?.idPegawai || pegawaiAktif?.nik || '').trim();
+
+      if (!idPegawai) {
+        tampilkanModeAbsensiHariIni();
+        return;
+      }
+
+      fetchDenganTimeout(WEB_APP_URL + '?aksi=cekRiwayatTerakhir&idPegawai=' + encodeURIComponent(idPegawai), {}, 8000)
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.sukses && res.terakhir) {
+            const dataTerakhir = dataServerKeDataLokal(res.terakhir);
+
+            if (dataTerakhir && dataTerakhir.statusAbsen === 'Datang') {
+              simpanAbsensiHariIni(dataTerakhir);
+            }
+
+            if (dataTerakhir && dataTerakhir.statusAbsen === 'Pulang') {
+              resetAbsensiHariIni();
+            }
+
+            if (paksaCek) {
+              tampilStatus(teksStatusTerakhir(res.terakhir), 'success');
+            }
+          } else {
+            resetAbsensiHariIni();
+            if (paksaCek) {
+              tampilStatus('Tidak ada riwayat absensi Datang/Pulang yang tercatat.', 'warning');
+            }
+          }
+
+          tampilkanModeAbsensiHariIni();
+        })
+        .catch(() => {
+          if (paksaCek) {
+            tampilStatus('Gagal memeriksa riwayat terakhir. Periksa koneksi atau server.', 'error');
+          }
+          tampilkanModeAbsensiHariIni();
+        });
     }
 
     function tampilkanModeAbsensiHariIni() {
@@ -1625,9 +1975,27 @@
         : 'Lanjut Ambil Foto';
     }
 
+    function tutupStatus() {
+      statusBox.classList.add('hidden');
+      statusBox.innerHTML = '';
+    }
+
     function tampilStatus(pesan, tipe = '') {
       statusBox.className = 'status ' + tipe;
-      statusBox.textContent = pesan;
+      statusBox.innerHTML = '';
+
+      const isi = document.createElement('div');
+      isi.textContent = pesan;
+      isi.style.paddingRight = '28px';
+
+      const tutup = document.createElement('button');
+      tutup.type = 'button';
+      tutup.className = 'status-close';
+      tutup.textContent = '×';
+      tutup.onclick = tutupStatus;
+
+      statusBox.appendChild(isi);
+      statusBox.appendChild(tutup);
       statusBox.classList.remove('hidden');
     }
 
@@ -1724,6 +2092,7 @@
         video.srcObject = stream;
 
         document.getElementById('formArea').classList.add('hidden');
+        document.getElementById('quickActionBar')?.classList.add('hidden');
         document.getElementById('cameraArea').classList.remove('hidden');
         document.getElementById('previewArea').classList.add('hidden');
         updateJamTanggal();
@@ -1741,6 +2110,7 @@
 
       document.getElementById('cameraArea').classList.add('hidden');
       document.getElementById('formArea').classList.remove('hidden');
+      document.getElementById('quickActionBar')?.classList.remove('hidden');
       tampilkanModeAbsensiHariIni();
     }
 
@@ -1840,14 +2210,19 @@
     }
 
     async function kirimDataKeServer(data) {
-      await fetch(WEB_APP_URL, {
+      const res = await fetch(WEB_APP_URL, {
         method: 'POST',
-        mode: 'no-cors',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8'
         },
         body: JSON.stringify(data)
       });
+
+      if (!res.ok) {
+        throw new Error('Server tidak merespons dengan baik.');
+      }
+
+      return res.json().catch(() => ({}));
     }
 
     async function kirimAbsensi() {
@@ -1916,6 +2291,7 @@
         btnGps.classList.remove('hidden');
         document.getElementById('previewArea').classList.add('hidden');
         document.getElementById('formArea').classList.remove('hidden');
+        document.getElementById('quickActionBar')?.classList.remove('hidden');
         document.getElementById('keterangan').value = '';
         tampilkanModeAbsensiHariIni();
       } catch (err) {
