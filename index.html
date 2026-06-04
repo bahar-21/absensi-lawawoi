@@ -952,7 +952,6 @@ transform: scaleX(-1);
           </div>
           <select id="detailAbsen">
             <option>Dinas Pagi</option>
-            <option>Dinas Luar</option>
           </select>
 
           <div class="label-row">
@@ -1111,20 +1110,19 @@ transform: scaleX(-1);
       GPS_MAX_AGE_MS: 0,
       JADWAL_DINAS: {
         Datang: [
-          { nama: 'Dinas Pagi', mulai: '07:15', selesai: '12:00' },
-          { nama: 'Dinas Sore', mulai: '13:45', selesai: '18:00' },
+          { nama: 'Dinas Pagi', mulai: '07:00', selesai: '11:00' },
+          { nama: 'Dinas Sore', mulai: '13:30', selesai: '18:00' },
           { nama: 'Dinas Malam', mulai: '19:45', selesai: '23:00' }
         ],
         Pulang: [
           { nama: 'Dinas Pagi', mulai: '11:30', selesai: '18:00' },
-          { nama: 'Dinas Sore', mulai: '20:00', selesai: '23:00' },
-          { nama: 'Dinas Malam', mulai: '08:00', selesai: '10:00' }
+          { nama: 'Dinas Sore', mulai: '19:30', selesai: '23:00' },
+          { nama: 'Dinas Malam', mulai: '07:30', selesai: '10:00' }
         ],
         Keterangan: [
           { nama: 'Libur', batas: '10:00' },
           { nama: 'Sakit', batas: '10:00' },
           { nama: 'Cuti', batas: '10:00' },
-          { nama: 'Lepas Malam', batas: '10:00' },
           { nama: 'Dinas Luar', batas: '10:00' },
           { nama: 'Dinas Sore', batas: '10:00' },
           { nama: 'Dinas Malam', batas: '10:00' }
@@ -1429,17 +1427,16 @@ transform: scaleX(-1);
         }
 
         if (this.isTesterMode()) {
-          const semua = CONFIG.JADWAL_DINAS[menu].map(function(j) { return j.nama; });
-          if (!semua.includes('Dinas Luar')) semua.push('Dinas Luar');
-          return semua;
-        }
+  return CONFIG.JADWAL_DINAS[menu].map(function(j) {
+    return j.nama;
+  });
+}
 
-        const aktif = CONFIG.JADWAL_DINAS[menu]
-          .filter((j) => this.dalamRentangJam(j))
-          .map(function(j) { return j.nama; });
-
-        if (!aktif.includes('Dinas Luar')) aktif.push('Dinas Luar');
-        return aktif;
+return CONFIG.JADWAL_DINAS[menu]
+  .filter((j) => this.dalamRentangJam(j))
+  .map(function(j) {
+    return j.nama;
+  });
       },
 
       formatDurasiKerja(ms) {
