@@ -539,7 +539,8 @@
       object-fit: cover;
       object-position: center top;
       margin-top: 8px;
-    }
+transform: scaleX(-1);
+}
 
     #previewFoto {
       width: 112px;
@@ -1740,6 +1741,8 @@ teksRingkasanPulang(datang, pulang) {
         DOM.canvas.height = outputSize;
 
         const ctx = DOM.canvas.getContext('2d');
+ctx.translate(outputSize, 0);
+ctx.scale(-1, 1);
         ctx.drawImage(
           DOM.video,
           cropX,
