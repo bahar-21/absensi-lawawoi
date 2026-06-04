@@ -833,7 +833,31 @@ transform: scaleX(-1);
       text-transform: uppercase;
       letter-spacing: .4px;
     }
+.jam-kerja-info{
+  margin-top:24px;
+  padding-top:10px;
 
+  border-top:1px solid #e2e8f0;
+
+  font-size:11px;
+  color:#64748b;
+}
+
+.jam-kerja-title{
+  font-size:11px;
+  font-weight:700;
+  color:#475569;
+  margin-bottom:6px;
+}
+
+.jam-kerja-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+
+  padding:2px 0;
+  line-height:1.4;
+}
   </style>
 </head>
 
@@ -1077,6 +1101,36 @@ transform: scaleX(-1);
       <div id="rekapContent" class="status"></div>
       <button type="button" class="btn-secondary" data-action="close-history">Tutup</button>
     </section>
+<div class="jam-kerja-info">
+  <div class="jam-kerja-title">
+    Jam Kerja UPT Puskesmas Lawawoi
+  </div>
+
+  <div class="jam-kerja-row">
+    <span>Senin - Kamis</span>
+    <span>07.30 - 13.45</span>
+  </div>
+
+  <div class="jam-kerja-row">
+    <span>Jumat</span>
+    <span>07.30 - 11.30</span>
+  </div>
+
+  <div class="jam-kerja-row">
+    <span>Sabtu</span>
+    <span>07.30 - 13.45</span>
+  </div>
+
+<div class="jam-kerja-row">
+    <span>Dinas Sore</span>
+    <span>14.00 - 20.00</span>
+  </div>
+
+  <div class="jam-kerja-row">
+    <span>Dinas Malam</span>
+    <span>20.00 - 08.00</span>
+  </div>
+</div>
   </div>
 
   <script>
@@ -1959,14 +2013,15 @@ ctx.scale(-1, 1);
       },
 
       updateTombolMulaiAbsen() {
-        if (!DOM.btnMulaiAbsen) return;
-        if (STATE.menuAbsenAktif === 'Pulang') {
-          const isi = DOM.keterangan ? DOM.keterangan.value.trim() : '';
-          DOM.btnMulaiAbsen.disabled = !isi;
-          return;
-        }
-        DOM.btnMulaiAbsen.disabled = false;
-      },
+  if (!DOM.btnMulaiAbsen) return;
+
+  if (STATE.menuAbsenAktif === 'Pulang') {
+    DOM.btnMulaiAbsen.disabled = false;
+    return;
+  }
+
+  DOM.btnMulaiAbsen.disabled = !DOM.detailAbsen.value;
+},
 
       renderStatusHariIni() {
         const data = STORAGE.ambilAbsensiHariIni();
