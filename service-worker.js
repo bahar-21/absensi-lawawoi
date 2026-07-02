@@ -1,4 +1,4 @@
-const CACHE_NAME = 'absensi-lawawoi-v3.2.0';
+const CACHE_NAME = 'absensi-lawawoi-v4.0';
 
 const FILES_TO_CACHE = [
   './',
