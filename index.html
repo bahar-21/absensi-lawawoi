@@ -1531,36 +1531,47 @@ cekAbsenPulangKadaluarsa(dataDatang) {
       // 2. Gunakan data lokal jika data server kosong atau lampau, namun data lokal hari ini
       // 2. Gunakan data lokal jika data server kosong atau lampau,
 //    tetapi hanya jika data lokal masih milik hari ini
+//    ATAU untuk Dinas Malam lintas hari (check-in kemarin, check-out hari ini)
 else if (
   lokal &&
   lokal.status &&
   lokal.status !== "BELUM_ABSEN" &&
-  (
-    lokal.datang &&
-    lokal.datang.timestampClient &&
-    String(lokal.datang.timestampClient).slice(0,10) === STORAGE.todayKey()
-  )
+  lokal.datang &&
+  lokal.datang.timestampClient
 ) {
-        const localRawStatus = String(lokal.status || '').trim();
-        const localStatus = localRawStatus.toLowerCase();
-        const localIsKeterangan = localStatus === 'keterangan' || CONFIG.JADWAL_DINAS.Keterangan.map(function(j){ return j.nama.toLowerCase(); }).indexOf(localStatus) !== -1;
-        if (localStatus === 'pulang' || localStatus === 'selesai') {
-          stateObj.status = "SELESAI";
-        } else if (localStatus === 'sudah_datang' || localStatus === 'datang') {
-          stateObj.status = "SUDAH_DATANG";
-        } else if (localStatus === 'tidak_absen_pulang' || localIsKeterangan) {
-          stateObj.status = localIsKeterangan ? "KETERANGAN" : "TIDAK_ABSEN_PULANG";
-        } else {
-          stateObj.status = lokal.status;
+        const tglDatangLokal = String(lokal.datang.timestampClient).slice(0,10);
+        const tglHariIni = STORAGE.todayKey();
+        const detailLokal = lokal.detail || lokal.datang.detailAbsen || '';
+        const isLintasHari = ['Dinas Malam', 'Dinas Sore + Malam', 'Dinas Malam + Pagi'].indexOf(detailLokal) !== -1;
+        
+        // Kondisi: lokal hari ini ATAU Dinas Malam lintas hari yang belum expired
+        const isDataLokaltodayOrLintasHari = (tglDatangLokal === tglHariIni) || (isLintasHari && tglDatangLokal < tglHariIni);
+        
+        if (isDataLokaltodayOrLintasHari) {
+          const localRawStatus = String(lokal.status || '').trim();
+          const localStatus = localRawStatus.toLowerCase();
+          const localIsKeterangan = localStatus === 'keterangan' || CONFIG.JADWAL_DINAS.Keterangan.map(function(j){ return j.nama.toLowerCase(); }).indexOf(localStatus) !== -1;
+          if (localStatus === 'pulang' || localStatus === 'selesai') {
+            stateObj.status = "SELESAI";
+          } else if (localStatus === 'sudah_datang' || localStatus === 'datang') {
+            stateObj.status = "SUDAH_DATANG";
+          } else if (localStatus === 'tidak_absen_pulang' || localIsKeterangan) {
+            stateObj.status = localIsKeterangan ? "KETERANGAN" : "TIDAK_ABSEN_PULANG";
+          } else {
+            stateObj.status = lokal.status;
+          }
+          stateObj.detail = lokal.detail || localRawStatus || '';
+          stateObj.datang = lokal.datang;
+          stateObj.pulang = lokal.pulang;
+          stateObj.expired = !!lokal.expired;
         }
-        stateObj.detail = lokal.detail || localRawStatus || '';
-        stateObj.datang = lokal.datang;
-        stateObj.pulang = lokal.pulang;
-        stateObj.expired = !!lokal.expired;
       }
 
       // Jalankan validasi kedaluwarsa otomatis
       this.cekAbsenKadaluarsa(stateObj);
+      
+      // Jalankan validasi waktu tiba untuk keterangan Dinas Sore/Malam
+      this.cekKeteranganWaktuTiba(stateObj);
 
       // Sinkronisasikan ke local storage agar persisten
       STORAGE.simpanAbsensiHariIni(stateObj);
@@ -1597,6 +1608,38 @@ else if (
         if (tglSekarangStr !== tglDatangStr || jamSekarangMenit > batasMenit) {
           stateObj.status = "TIDAK_ABSEN_PULANG";
           stateObj.expired = true;
+        }
+      }
+    },
+
+    // Cek apakah status KETERANGAN untuk Dinas Sore/Malam sudah waktunya untuk absensi datang
+    cekKeteranganWaktuTiba(stateObj) {
+      if (stateObj.status !== "KETERANGAN") return;
+
+      const detail = stateObj.detail || '';
+      const sekarang = new Date();
+      const jamSekarangMenit = (sekarang.getHours() * 60) + sekarang.getMinutes();
+
+      // Jika Dinas Sore, cek apakah sudah pukul 13:45
+      if (detail === 'Dinas Sore') {
+        const batasSore = 13 * 60 + 45; // 13:45
+        if (jamSekarangMenit >= batasSore) {
+          stateObj.status = "BELUM_ABSEN";
+          stateObj.detail = "";
+          stateObj.datang = null;
+          stateObj.pulang = null;
+          stateObj.expired = false;
+        }
+      }
+      // Jika Dinas Malam, cek apakah sudah pukul 19:45
+      else if (detail === 'Dinas Malam') {
+        const batasMalam = 19 * 60 + 45; // 19:45
+        if (jamSekarangMenit >= batasMalam) {
+          stateObj.status = "BELUM_ABSEN";
+          stateObj.detail = "";
+          stateObj.datang = null;
+          stateObj.pulang = null;
+          stateObj.expired = false;
         }
       }
     }
@@ -1725,6 +1768,7 @@ else if (
         if (STATE.pegawaiAktif) {
           const stateLama = STATE.absensiHariIni.status;
           ENGINE.cekAbsenKadaluarsa(STATE.absensiHariIni);
+          ENGINE.cekKeteranganWaktuTiba(STATE.absensiHariIni);
           if (stateLama !== STATE.absensiHariIni.status) {
             this.renderStatusHariIni();
           }
