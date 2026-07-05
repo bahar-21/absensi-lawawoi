@@ -2478,7 +2478,7 @@ return `
         const action = target.dataset.action;
         const actions = {
           'toggle-header-menu': () => this.toggleHeaderMenu(),
-          'refresh-status': () => this.cekRiwayatTerakhir(true),
+          'refresh-status': () => this.refreshAplikasi(),
           'open-history': () => this.bukaRiwayatPegawai(),
           'close-history': () => UI.hide(DOM.rekapArea),
           'close-status': () => UI.clearStatus(),
@@ -2885,6 +2885,34 @@ return `
       );
     },
 
+    async refreshAplikasi() {
+
+    try {
+
+        // cek update service worker
+        if ('serviceWorker' in navigator) {
+
+            const reg = await navigator.serviceWorker.getRegistration();
+
+            if (reg) {
+
+                await reg.update();
+
+            }
+
+        }
+
+    } catch (e) {
+
+        console.error(e);
+
+    }
+
+    // reload halaman
+    location.reload();
+
+},
+
     toggleHeaderMenu() { if (DOM.headerMenuPanel) DOM.headerMenuPanel.classList.toggle('hidden'); },
     tutupHeaderMenu() { if (DOM.headerMenuPanel) DOM.headerMenuPanel.classList.add('hidden'); },
     lihatAdminDetail(j, t) { document.querySelectorAll('[data-admin-chip]').forEach(function(e){e.classList.toggle('active', e===t);}); UI.renderAdminDetail(j); },
@@ -2981,10 +3009,21 @@ return `
   else APP.mulai();
 
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('service-worker.js').catch(function() {});
-    });
-  }
+  window.addEventListener('load', async function () {
+
+    try {
+
+      const reg = await navigator.serviceWorker.register('service-worker.js');
+
+      // Selalu cek apakah ada update
+      reg.update();
+
+    } catch (e) {
+      console.error(e);
+    }
+
+  });
+}
   </script>
   <div class="dev-footer">by : bahar_sidrap @ 2026</div>
 </body>
