@@ -1502,6 +1502,12 @@ cekAbsenPulangKadaluarsa(dataDatang) {
       // 1. Prioritaskan record hari ini
       const soalTanggal = row && (row.tanggal || row.tanggalTugas || row.timestampClient || row.timestampServer || '');
       const isServerHariIni = row && this.isTanggalHariIni(soalTanggal);
+      console.log("===== DEBUG DINAS MALAM =====");
+console.log("ROW =", row);
+console.log("Tanggal =", soalTanggal);
+console.log("isServerHariIni =", isServerHariIni);
+console.log("Status =", row?.statusAbsen || row?.status);
+console.log("Detail =", row?.detailAbsen || row?.detail);
       
       // Jika data di server valid hari ini
       if (isServerHariIni) {
