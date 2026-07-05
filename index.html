@@ -617,7 +617,7 @@
     WEB_APP_URL: 'https://script.google.com/macros/s/AKfycby1H2Klg2I0jdV1uTRdscNoSEDbmWD7FvYGKEpJ-89uuDLez4jw4b6i407vXXI1Sq_f/exec',
     SHARED_SECRET: 'absn_lawawoi_2026',
     ADMIN_IDS: ['198001022005021003','197211112005021003','198404152010012029','199509282024212015'],
-    MODE_UJI_COBA: false,
+    MODE_UJI_COBA: true,
     TESTER_ID: '0000',
     CACHE_ADMIN_MS: 5 * 60 * 1000,
     CACHE_PENGUMUMAN_MS: 60 * 1000,
@@ -1883,8 +1883,10 @@ else if (
 
     // Alur UI Utama Murni Menggunakan STATE Terpusat
     renderStatusHariIni() {
-      console.log("STATE.absensiHariIni =", STATE.absensiHariIni);
+
+console.log("STATE.absensiHariIni =", STATE.absensiHariIni);
 console.log("stateHariIni =", STATE.absensiHariIni.status);
+
       this.hide(DOM.absenDatangSummary);
       this.show(DOM.formAbsensiFields);
       this.hide(DOM.infoSelesaiAbsen);
