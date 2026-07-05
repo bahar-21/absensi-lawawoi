@@ -1501,17 +1501,22 @@ cekAbsenPulangKadaluarsa(dataDatang) {
 
       // 1. Prioritaskan record hari ini
       const soalTanggal = row && (row.tanggal || row.tanggalTugas || row.timestampClient || row.timestampServer || '');
-      const isServerHariIni = row && this.isTanggalHariIni(soalTanggal);
-      console.log("===== DEBUG DINAS MALAM =====");
-console.log("ROW =", row);
-console.log("Tanggal =", soalTanggal);
-console.log("isServerHariIni =", isServerHariIni);
-console.log("Status =", row?.statusAbsen || row?.status);
-console.log("Detail =", row?.detailAbsen || row?.detail);
-      
-      // Jika data di server valid hari ini
-      if (isServerHariIni) {
-        const rawStatus = String(row.statusAbsen || row.status || '').trim();
+const isServerHariIni = row && this.isTanggalHariIni(soalTanggal);
+
+// Izinkan record datang dinas malam lintas hari
+const rawStatus = String(row?.statusAbsen || row?.status || '').trim().toLowerCase();
+const detailServer = String(row?.detailAbsen || row?.detail || '').trim();
+
+const isServerLintasHari =
+    rawStatus === 'datang' &&
+    [
+      'Dinas Malam',
+      'Dinas Sore + Malam',
+      'Dinas Malam + Pagi'
+    ].includes(detailServer);
+
+// Jika data server hari ini ATAU datang dinas malam lintas hari
+if (isServerHariIni || isServerLintasHari) {
         const s = rawStatus.toLowerCase();
         const det = row.detailAbsen || row.detail || '';
         const keteranganOptions = CONFIG.JADWAL_DINAS.Keterangan.map(function(j){ return j.nama.toLowerCase(); });
