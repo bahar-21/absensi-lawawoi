@@ -634,7 +634,7 @@
       <div class="jam-kerja-row"><span>Jumat</span><span>07.30 - 11.30</span></div>
       <div class="jam-kerja-row"><span>Sabtu</span><span>07.30 - 13.45</span></div>
       <div class="jam-kerja-row"><span>Dinas Sore</span><span>14.00 - 20.00</span></div>
-      <div class="jam-kerja-row"><span>Dinas Malam</span><span>20.00 - 08.00</span></div>
+      <div class="jam-kerja-row"><span>Dinas Malam</span><span>20.00 - 07.30</span></div>
     </div>
   </div>
 
@@ -685,18 +685,12 @@
       Datang: [
         { nama: 'Dinas Pagi', mulai: '07:00', selesai: '11:00', batasPulang: '18:00' },
         { nama: 'Dinas Sore', mulai: '13:30', selesai: '18:00', batasPulang: '23:01' },
-        { nama: 'Dinas Malam', mulai: '19:45', selesai: '23:00', batasPulang: '10:01' }, // Pulang esok harinya
-        { nama: 'Dinas Pagi + Sore', mulai: '07:00', selesai: '11:00', batasPulang: '23:01' },
-        { nama: 'Dinas Sore + Malam', mulai: '13:30', selesai: '18:00', batasPulang: '10:01' }, // Pulang esok harinya
-        { nama: 'Dinas Malam + Pagi', mulai: '19:45', selesai: '23:00', batasPulang: '18:00' }  // Pulang esok harinya
+        { nama: 'Dinas Malam', mulai: '19:45', selesai: '23:00', batasPulang: '10:01' } // Pulang esok harinya
       ],
       Pulang: [
         { nama: 'Dinas Pagi', mulai: '11:30', selesai: '18:00' },
         { nama: 'Dinas Sore', mulai: '19:30', selesai: '23:00' },
-        { nama: 'Dinas Malam', mulai: '07:30', selesai: '10:00' },
-        { nama: 'Dinas Pagi + Sore', mulai: '19:30', selesai: '23:00' },
-        { nama: 'Dinas Sore + Malam', mulai: '07:30', selesai: '10:00' },
-        { nama: 'Dinas Malam + Pagi', mulai: '11:30', selesai: '18:00' }
+        { nama: 'Dinas Malam', mulai: '07:30', selesai: '10:00' }
       ],
       Keterangan: [
         { nama: 'Libur', batas: '10:00' },
@@ -993,7 +987,7 @@ jamPulangNormal(detailAbsen) {
   // Hari biasa
   if (detail.includes('PAGI')) return '13:45';
   if (detail.includes('SORE')) return '20:00';
-  if (detail.includes('MALAM')) return '08:00';
+  if (detail.includes('MALAM')) return '07:30';
 
   return '13:45';
 },
@@ -1396,7 +1390,7 @@ statusPulang(detailAbsen, waktu) {
     case 'Dinas Malam':
     case 'Dinas Sore + Malam':
 
-      batasPulang = 8 * 60;
+      batasPulang = 7 * 60 + 30;
 
       break;
 
@@ -2169,10 +2163,15 @@ if (DOM.summaryThumbContainer && DOM.summaryThumb) {
         ? ENGINE.statusPulang(detail, waktuPulang)
         : '-';
 
-    const lokasi = ENGINE.statusLokasi(
-      p.latitude || d.latitude,
-      p.longitude || d.longitude
-    );
+    const lokasiDatang = ENGINE.statusLokasi(
+  d.latitude,
+  d.longitude
+);
+
+const lokasiPulang = ENGINE.statusLokasi(
+  p.latitude,
+  p.longitude
+);
 
     const durasi =
       (waktuDatang && waktuPulang)
@@ -2195,7 +2194,8 @@ if (DOM.summaryThumbContainer && DOM.summaryThumb) {
           <strong>Tanggal:</strong> ${tanggalTugas}<br>
           <strong>Jam Datang:</strong>
           ${UTIL.jamIndonesia(d.timestampClient || '')}<br>
-          <strong>Status:</strong> ${statusDatang}
+          <strong>Status:</strong> ${statusDatang}<br>
+          <strong>Lokasi:</strong> ${lokasiDatang}
       </div>
   </div>
 
@@ -2214,7 +2214,7 @@ if (DOM.summaryThumbContainer && DOM.summaryThumb) {
           <strong>Jam Pulang:</strong>
           ${UTIL.jamIndonesia(p.timestampClient || '')}<br>
           <strong>Status:</strong> ${statusPulang}<br>
-          <strong>Lokasi:</strong> ${lokasi}<br>
+          <strong>Lokasi:</strong> ${lokasiPulang}<br>
           <strong>Kerja:</strong> ${durasi}<br>
           <strong>Ket</strong> ${p.keterangan || d.keterangan || 'Selesai'}
       </div>
