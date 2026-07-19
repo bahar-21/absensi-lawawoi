@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icon-192.png" />
   <meta name="robots" content="noindex,nofollow" />
   <title>Absensi Digital UPT Puskesmas Lawawoi</title>
-
+  <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: Arial, sans-serif; background: #e2e8f0; color: #0f172a; }
@@ -329,6 +329,38 @@
       margin-bottom: 10px;
       text-align: right;
     }
+    .summary-info{
+    display:flex;
+    align-items:flex-start;
+    gap:16px;
+    margin:16px 0;
+}
+
+.summary-thumb{
+    flex:0 0 110px;
+    display:flex;
+    justify-content:center;
+}
+
+.summary-thumb img{
+    width:110px;
+    height:110px;
+    border-radius:50%;
+    object-fit:cover;
+    border:4px solid #fff;
+    box-shadow:0 4px 10px rgba(0,0,0,.18);
+}
+
+.summary-content{
+    flex:1;
+    min-width:0;
+}
+
+.summary-content .title{
+    margin-top:4px;
+    margin-bottom:10px;
+}
+
   </style>
 </head>
 <body>
@@ -410,8 +442,17 @@
         <!-- Summary Datang Tetap Dipertahankan -->
         <div id="absenDatangSummary" class="absen-summary hidden">
           <span class="badge">ABSEN DATANG TERCATAT</span>
-          <div class="title" id="summaryDatangTitle">-</div>
-          <div class="text" id="summaryDatangText">-</div>
+
+          <div class="summary-info">
+  <div class="summary-thumb hidden" id="summaryThumbContainer">
+    <img id="summaryThumb" alt="Foto Pegawai">
+  </div>
+
+  <div class="summary-content">
+    <div class="title" id="summaryDatangTitle">-</div>
+    <div class="text" id="summaryDatangText">-</div>
+  </div>
+</div>
           <div class="spirit">Selamat bekerja, semoga tugas hari ini lancar dan bernilai ibadah.</div>
           <button type="button" class="btn-main" data-action="start-checkout">ABSENSI PULANG</button>
         </div>
@@ -670,6 +711,7 @@
   const STATE = {
     pegawaiAktif: null,
     menuAbsenAktif: 'Datang',
+    dariTambahDinas: false,
     lokasiTerakhir: null,
     fotoBase64: null,
     sedangKirim: false,
@@ -709,7 +751,7 @@
       'adminTanggalFilter', 'adminTotal', 'adminHadir', 'adminDinas', 'adminTidakHadir', 'adminBelum', 'adminDetail', 'copyToast',
       'btnTabHarian', 'btnTabBulanan', 'adminHarianArea', 'adminBulananArea', 'rekapBulan', 'rekapTahun', 'rekapPegawai',
       'rekapBulananInfo', 'rekapBulananTable', 'btnTampilkanRekap',
-      'absenDatangSummary', 'summaryDatangTitle', 'summaryDatangText',
+      'absenDatangSummary', 'summaryThumbContainer', 'summaryThumb', 'summaryDatangTitle', 'summaryDatangText',
       'formAbsensiFields', 'labelDetailAbsen', 'labelKeterangan', 'btnMulaiAbsen',
       'runningTextWrap', 'runningTextTrack', 'btnTabPengumuman', 'adminPengumumanArea',
       'inputPengumumanBaru', 'pengumumanList', 'pengumumanCounter', 'formAbsensiTitle', 'noteFormAbsensi',
@@ -1087,6 +1129,8 @@ jamPulangNormal(detailAbsen) {
         longitude: this.normCoord(row.longitude),
         accuracy: row.accuracy || '',
         timestampClient: row.timestampClient || row.timestampServer || new Date().toISOString(),
+        linkFoto: row.linkFoto || '',
+        fotoBase64: row.fotoBase64 || '',
         tanggalTugas: String(row.tanggal || '').slice(0, 10) || STORAGE.todayKey()
       };
     },
@@ -1194,7 +1238,7 @@ jamPulangNormal(detailAbsen) {
       const p = { 'Libur':'Selamat Berlibur', 'Sakit':'Jangan lupa lampirkan Surat Keterangan Istirahat, Semoga Lekas Sembuh',
         'Dinas Sore':'Silahkan kembali isi Absensi Kehadiran saat mulai bertugas (Sore 13.45)',
         'Dinas Malam':'Silahkan kembali isi Absensi Kehadiran saat mulai bertugas (Malam 19.45)',
-        'Dinas Luar':'Silahkan kembali isi Absensi Kehadiran saat mulai bertugas' };
+        'Dinas Luar':'selamat bertugas' };
       return p[d] || 'Keterangan tercatat.';
     },
     // ===============================
@@ -1498,7 +1542,6 @@ cekAbsenPulangKadaluarsa(dataDatang) {
         pulang: null,
         expired: false
       };
-
       // 1. Prioritaskan record hari ini
       const soalTanggal = row && (row.tanggal || row.tanggalTugas || row.timestampClient || row.timestampServer || '');
 const isServerHariIni = row && this.isTanggalHariIni(soalTanggal);
@@ -1655,27 +1698,115 @@ else if (
       }
     }
   };
+  let wajahTerdeteksi = false;
+let modelWajahSiap = false;
 
+
+async function muatModelWajah(){
+
+  console.log("Mulai load model wajah");
+
+  await faceapi.nets.tinyFaceDetector.loadFromUri(
+    "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model"
+  );
+
+  modelWajahSiap = true;
+
+  console.log("Model wajah siap");
+
+}
+
+
+function mulaiDeteksiWajah(){
+
+  setInterval(async function(){
+
+    if(!modelWajahSiap) return;
+
+    const hasil = await faceapi.detectSingleFace(
+      DOM.video,
+      new faceapi.TinyFaceDetectorOptions()
+    );
+
+    if (hasil) {wajahTerdeteksi = cekPosisiWajah(hasil);} else {wajahTerdeteksi = false;}
+
+    updateTombolWajah(wajahTerdeteksi);
+
+  },500);
+
+}
+function updateTombolWajah(status){
+
+  const tombol = document.querySelector('[data-action="capture-photo"]');
+
+  if(!tombol) return;
+
+
+  if(status){
+
+    tombol.style.background = "#16a34a";
+    tombol.style.color = "white";
+    tombol.innerHTML = "Ambil Foto";
+
+  }else{
+
+    tombol.style.background = "#dc2626";
+    tombol.style.color = "white";
+    tombol.innerHTML = "Posisikan Wajah";
+
+  }
+
+}
+function cekPosisiWajah(hasil){
+
+  const box = hasil.box;
+
+  const ukuranMinimal = 175;   // bisa disesuaikan nanti
+const ukuranMaksimal = 240;  // agar tidak terlalu dekat
+
+  const tengahX = box.x + (box.width / 2);
+  const tengahY = box.y + (box.height / 2);
+
+  const kiri   = (DOM.video.videoWidth  - 176) / 2;
+  const kanan  = kiri + 176;
+
+  const atas   = (DOM.video.videoHeight * 0.43) - (218 / 2);
+  const bawah  = atas + 218;
+
+  return (
+  tengahX >= kiri &&
+  tengahX <= kanan &&
+  tengahY >= atas &&
+  tengahY <= bawah &&
+  box.width >= ukuranMinimal &&
+  box.width <= ukuranMaksimal
+);
+
+}
   /* MEDIA */
   const MEDIA = {
     async bukaKamera() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('Kamera tidak dapat dibuka. Gunakan Chrome di HP dan izinkan akses kamera.');
       this.tutupKamera();
       STATE.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-      DOM.video.srcObject = STATE.stream; await DOM.video.play();
+      DOM.video.srcObject = STATE.stream; await DOM.video.play(); console.log("Kamera aktif, mulai deteksi wajah"); mulaiDeteksiWajah();
     },
     tutupKamera() { if (STATE.stream) { STATE.stream.getTracks().forEach(function(t){t.stop();}); STATE.stream = null; } if (DOM.video) DOM.video.srcObject = null; },
     ambilFoto() {
       if (!DOM.video || !DOM.canvas) throw new Error('Elemen kamera belum siap.');
       const vw = DOM.video.videoWidth||640, vh = DOM.video.videoHeight||480;
       const out = Math.min(CONFIG.FOTO_MAX_WIDTH, 280);
-      const crop = Math.min(vw, vh);
-      const cx = Math.max(0, Math.round((vw-crop)/2));
-      const cy0 = Math.round((vh-crop)/2);
-      const cy = Math.max(0, cy0 - Math.round(vh*0.10));
+      // Crop sedikit lebih dekat agar wajah lebih dominan
+const crop = Math.round(Math.min(vw, vh) * 0.88);
+
+const cx = Math.max(0, Math.round((vw - crop) / 2));
+
+const cy0 = Math.round((vh - crop) / 2);
+const cy = Math.max(0, cy0 - Math.round(crop * 0.06));
       const cyf = Math.min(cy, Math.max(0, vh-crop));
       DOM.canvas.width = out; DOM.canvas.height = out;
       const ctx = DOM.canvas.getContext('2d');
+      ctx.filter = "brightness(1.05) contrast(1.08)";
       ctx.translate(out, 0); ctx.scale(-1, 1);
       ctx.drawImage(DOM.video, cx, cyf, crop, crop, 0, 0, out, out);
       STATE.fotoBase64 = DOM.canvas.toDataURL('image/jpeg', CONFIG.FOTO_QUALITY);
@@ -1895,9 +2026,6 @@ else if (
     // Alur UI Utama Murni Menggunakan STATE Terpusat
     renderStatusHariIni() {
 
-console.log("STATE.absensiHariIni =", STATE.absensiHariIni);
-console.log("stateHariIni =", STATE.absensiHariIni.status);
-
       this.hide(DOM.absenDatangSummary);
       this.show(DOM.formAbsensiFields);
       this.hide(DOM.infoSelesaiAbsen);
@@ -1939,12 +2067,45 @@ console.log("stateHariIni =", STATE.absensiHariIni.status);
       }
     },
     tampilkanRingkasanDatang(d) {
-      if (!d) return;
-      if (DOM.summaryDatangTitle) DOM.summaryDatangTitle.textContent = d.detailAbsen||d.detail||'Dinas';
-      if (DOM.summaryDatangText) DOM.summaryDatangText.textContent = ENGINE.teksRingkasanDatang(d);
-      this.show(DOM.absenDatangSummary);
-      this.hide(DOM.formAbsensiFields);
-    },
+  if (!d) return;
+
+  if (DOM.summaryDatangTitle)
+    DOM.summaryDatangTitle.textContent = d.detailAbsen || d.detail || 'Dinas';
+
+  if (DOM.summaryDatangText)
+    DOM.summaryDatangText.textContent = ENGINE.teksRingkasanDatang(d);
+
+  // Tampilkan thumbnail jika ada
+if (DOM.summaryThumbContainer && DOM.summaryThumb) {
+
+  const foto = d.linkFoto || d.fotoBase64;
+
+  if (foto) {
+
+    let urlFoto = foto;
+
+    // Jika foto dari Google Drive, ubah ke thumbnail
+    if (foto.includes("drive.google.com")) {
+      const id = foto.match(/id=([^&]+)/)?.[1];
+      if (id) {
+        urlFoto = `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+      }
+    }
+
+    DOM.summaryThumb.src = urlFoto;
+    DOM.summaryThumbContainer.classList.remove("hidden");
+
+  } else {
+
+    DOM.summaryThumb.src = "";
+    DOM.summaryThumbContainer.classList.add("hidden");
+
+  }
+}
+
+  this.show(DOM.absenDatangSummary);
+  this.hide(DOM.formAbsensiFields);
+},
 
     // Tampilkan Informasi Akhir Absen Tanpa Summary Pulang Terpisah
     tampilkanSelesaiAbsenHariIni() {
@@ -1972,6 +2133,8 @@ console.log("stateHariIni =", STATE.absensiHariIni.status);
 
     const d = stateObj.datang || {};
     const p = stateObj.pulang || {};
+    const fotoDatang = d.linkFoto || d.fotoBase64 || '';
+    const fotoPulang = p.linkFoto || p.fotoBase64 || '';
 
     const tanggalTugas =
       d.timestampClient
@@ -2015,24 +2178,55 @@ console.log("stateHariIni =", STATE.absensiHariIni.status);
         : '-';
 
     content = `
-      <strong>Tugas / Dinas:</strong> ${detail || '-'}<br>
 
-      <strong>Tanggal Tugas:</strong> ${tanggalTugas}<br>
+<div class="summary-card">
 
-      <strong>Absen Datang:</strong>
-      ${UTIL.jamIndonesia(d.timestampClient || '')}
-      ${statusDatang ? `(${statusDatang})` : ''}<br>
+  <div class="summary-card-title">📥 ABSEN DATANG</div>
 
-      <strong>Absen Pulang:</strong>
-      ${UTIL.jamIndonesia(p.timestampClient || '')}
-      ${statusPulang ? `(${statusPulang})` : ''}<br>
+  <div class="summary-info">
+      <div class="summary-thumb">
+          ${fotoDatang ? UI.renderThumbnailFoto(fotoDatang) : ''}
+      </div>
 
-      <strong>Lokasi:</strong> ${lokasi}<br>
+      <div class="summary-content">
+          <strong>Tugas / Dinas:</strong> ${detail || '-'}<br>
+          <strong>Tanggal Tugas:</strong> ${tanggalTugas}<br>
+          <strong>Jam Datang:</strong>
+          ${UTIL.jamIndonesia(d.timestampClient || '')}<br>
+          <strong>Status:</strong> ${statusDatang}
+      </div>
+  </div>
 
-      <strong>Total Jam Kerja:</strong> ${durasi}<br>
+</div>
 
-      <strong>Keterangan:</strong> ${p.keterangan || d.keterangan || 'Selesai'}
-    `;
+<div class="summary-card">
+
+  <div class="summary-card-title">📤 ABSEN PULANG</div>
+
+  <div class="summary-info">
+      <div class="summary-thumb">
+          ${fotoPulang ? UI.renderThumbnailFoto(fotoPulang) : ''}
+      </div>
+
+      <div class="summary-content">
+          <strong>Jam Pulang:</strong>
+          ${UTIL.jamIndonesia(p.timestampClient || '')}<br>
+          <strong>Status:</strong> ${statusPulang}<br>
+          <strong>Lokasi:</strong> ${lokasi}<br>
+          <strong>Total Jam Kerja:</strong> ${durasi}<br>
+          <strong>Keterangan:</strong> ${p.keterangan || d.keterangan || 'Selesai'}
+      </div>
+  </div>
+
+</div>
+
+<br>
+
+<button id="btnTambahDinas" class="btn btn-primary">
+➕ Tambah Dinas
+</button>
+
+`;
 
   }
 
@@ -2103,11 +2297,46 @@ console.log("stateHariIni =", STATE.absensiHariIni.status);
       <div class="absen-selesai-title">${title}</div>
       <div class="absen-selesai-grid">${content}</div>
     `;
+    const btnTambah = document.getElementById("btnTambahDinas");
+    if (btnTambah) {
+      btnTambah.onclick = () => {
+        STATE.dariTambahDinas = true;
+        STATE.menuAbsenAktif = 'Datang';
+        STATE.absensiHariIni = { status: 'BELUM_ABSEN', detail: '', datang: null, pulang: null, expired: false };
+        ENGINE.setMode('Datang');
+        UI.hide(DOM.infoSelesaiAbsen);
+        UI.tampilkanFormAbsensi();
+        if (DOM.keterangan) DOM.keterangan.value = '';
+        UI.setStatus('Form absensi ditampilkan. Silakan pilih jenis dinas.', 'success');
+      };
+    }
 
     this.show(DOM.infoSelesaiAbsen);
 
   }
 
+},
+
+renderThumbnailFoto(foto) {
+  if (!foto) return '';
+
+  let url = foto;
+
+  if (foto.includes('drive.google.com')) {
+    const id = foto.match(/id=([^&]+)/)?.[1];
+    if (id) {
+      url = `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+    }
+  }
+
+  return `
+    <div class="thumbnail-absen">
+      <img
+        src="${url}"
+        class="foto-thumbnail"
+        onclick="UI.previewFoto('${url}')">
+    </div>
+  `;
 },
 
     tampilkanKamera() { this.hide(DOM.formArea); this.hide(DOM.previewArea); this.show(DOM.cameraArea); this.clearStatus(); },
@@ -2442,7 +2671,9 @@ return `
 
   /* APP */
   const APP = {
-    mulai() {
+    async mulai() {
+
+      await muatModelWajah();
       initDOM();
       UI.updateJamTanggal();
       UI.updateNetworkStatus();
@@ -2649,7 +2880,25 @@ return `
       STATE.fotoBase64 = null; STATE.lokasiTerakhir = null;
       try { UI.tampilkanKamera(); await MEDIA.bukaKamera(); } catch (err) { UI.tampilkanFormAbsensi(); UI.setStatus(err.message, 'error'); }
     },
-    async ambilFoto() { try { MEDIA.ambilFoto(); UI.tampilkanPreview(); await this.ambilGPSOtomatis(); } catch (err) { UI.setStatus('Gagal mengambil foto: ' + err.message, 'error'); } },
+    async ambilFoto() {
+  try { 
+
+    if (!wajahTerdeteksi) {
+      UI.setStatus(
+        'Posisikan wajah dalam bingkai terlebih dahulu.',
+        'error'
+      );
+      return;
+    }
+
+    MEDIA.ambilFoto(); 
+    UI.tampilkanPreview(); 
+    await this.ambilGPSOtomatis(); 
+
+  } catch (err) {
+    UI.setStatus('Gagal mengambil foto: ' + err.message, 'error'); 
+  }
+},
     async ambilGPSOtomatis() {
       try { if (DOM.gpsStatus) DOM.gpsStatus.textContent = 'Mengambil lokasi...'; UI.hide(DOM.btnGps); UI.hide(DOM.btnKirim); UI.hide(DOM.btnUlangGps);
         const l = await MEDIA.ambilGPS(); STATE.lokasiTerakhir = l; UI.tampilkanGps(l); UI.clearStatus();
@@ -2704,6 +2953,11 @@ return `
       
       try {
         const res = await API.kirimAbsensi(data);
+        console.log('Response Server:', res);
+        if (res.linkFoto) {
+    data.linkFoto = res.linkFoto;
+}console.log("Data setelah ditambah linkFoto:");
+console.log(JSON.stringify(data, null, 2));
         if (res && res.sukses) {
           const stateLokalLama = STORAGE.ambilAbsensiHariIni();
           let dataTerpadu = {};
