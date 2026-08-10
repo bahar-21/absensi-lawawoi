@@ -1773,8 +1773,8 @@
         const durasi = (waktuDatang && waktuPulang) ? ENGINE.formatDurasiKerja(waktuPulang - waktuDatang) : '-';
 
         // FIX #17: Escape URL untuk XSS prevention
-        const escFotoDatang = UTIL.escapeHTML(UI.renderThumbnailFoto(fotoDatang));
-        const escFotoPulang = UTIL.escapeHTML(UI.renderThumbnailFoto(fotoPulang));
+        const escFotoDatang = UI.renderThumbnailFoto(fotoDatang);
+        const escFotoPulang = UI.renderThumbnailFoto(fotoPulang);
 
         content = `
           <div class="summary-card">
