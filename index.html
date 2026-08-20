@@ -308,6 +308,22 @@
     .riwayat-card .badge { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #0f766e; color: white; font-size: 10px; font-weight: 900; letter-spacing: .3px; margin-bottom: 7px; }
     .riwayat-card .title { font-size: 15px; font-weight: 900; margin-bottom: 5px; }
     .riwayat-card .text { font-size: 13px; line-height: 1.55; color: #334155; white-space: pre-line; }
+    .riwayat-rekap-card { background: #ffffff; border-color: #cbd5e1; padding: 0; overflow: hidden; color: #0f172a; }
+    .riwayat-rekap-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; padding: 12px 13px 10px; background: linear-gradient(135deg, #ecfdf5, #f8fafc); border-bottom: 1px solid #d1fae5; }
+    .riwayat-rekap-date { font-size: 12px; font-weight: 800; color: #475569; margin-bottom: 3px; }
+    .riwayat-rekap-detail { font-size: 15px; font-weight: 900; color: #134e4a; }
+    .riwayat-bobot { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; background: #0f766e; color: #ffffff; font-size: 11px; font-weight: 900; white-space: nowrap; }
+    .riwayat-absen-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 10px 11px 12px; }
+    .riwayat-absen-grid.satu-kartu { grid-template-columns: 1fr; }
+    .riwayat-absen-box { min-width: 0; padding: 9px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; }
+    .riwayat-absen-box.pulang { background: #fff7ed; border-color: #fed7aa; }
+    .riwayat-absen-label { margin-bottom: 7px; font-size: 10px; font-weight: 900; letter-spacing: .5px; color: #0f766e; }
+    .riwayat-absen-box.pulang .riwayat-absen-label { color: #c2410c; }
+    .riwayat-absen-info { display: flex; gap: 5px; align-items: flex-start; margin-top: 5px; font-size: 12px; line-height: 1.35; color: #334155; }
+    .riwayat-absen-info:first-of-type { margin-top: 0; font-weight: 800; color: #0f172a; }
+    .riwayat-absen-info span:last-child { min-width: 0; overflow-wrap: anywhere; }
+    .riwayat-status { display: inline-block; margin-left: 3px; padding: 1px 5px; border-radius: 999px; background: #dbeafe; color: #1d4ed8; font-size: 10px; font-weight: 800; vertical-align: 1px; }
+    @media (max-width: 360px) { .riwayat-absen-grid { grid-template-columns: 1fr; } }
 
     .admin-page { padding-top: 2px; }
     .admin-header-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
@@ -1244,7 +1260,6 @@
     simpanAbsensiAdmin(d) { return this.get(Object.assign({ aksi: 'simpanAbsensiAdmin' }, d || {})); },
     rekapBulanan(b, t, id) { return this.get({ aksi: 'rekapBulanan', bulan: b, tahun: t, idPegawai: id || 'SEMUA' }); },
     daftarPegawai() { return this.get({ aksi: 'daftarPegawai' }); },
-    riwayatPegawai(id) { return this.get({ aksi: 'riwayatPegawai', idPegawai: id }); },
     kirimAbsensi(d) { return this.post(d); }
   };
 
@@ -1332,6 +1347,40 @@
         return UTIL.tanggalKeyWITA(parsed) === h;
       }
       return false;
+    },
+    isTanggalKemarin(t) {
+      if (!t) return false;
+      const kemarin = UTIL.tanggalKeyWITA(new Date(Date.now() - 24 * 60 * 60 * 1000));
+      const s = String(t).trim();
+      if (s === kemarin || s.slice(0,10) === kemarin) return true;
+      const parsed = new Date(s);
+      return !isNaN(parsed.getTime()) && UTIL.tanggalKeyWITA(parsed) === kemarin;
+    },
+    isDinasLintasHari(detail) {
+      return ['Dinas Malam', 'Dinas Sore + Malam', 'Dinas Malam + Pagi'].indexOf(String(detail || '').trim()) !== -1;
+    },
+    isDatangMalamMenungguPulang(data, status) {
+      const d = data || {};
+      const statusDatang = String(status || d.status || '').trim().toUpperCase();
+      const detail = d.detailAbsen || d.detail || '';
+      const waktu = d.timestampClient || d.timestampServer || d.tanggalTugas || d.tanggal || '';
+      return (statusDatang === 'SUDAH_DATANG' || statusDatang === 'DATANG')
+        && this.isDinasLintasHari(detail)
+        && this.isTanggalKemarin(waktu);
+    },
+    resetStatusJikaBedaHari(stateObj) {
+      if (!stateObj || !stateObj.status || stateObj.status === 'BELUM_ABSEN') return false;
+      const referensiWaktu = (stateObj.pulang && stateObj.pulang.timestampClient)
+        || (stateObj.datang && stateObj.datang.timestampClient) || '';
+      const masihMenungguPulangMalam = stateObj.status === 'SUDAH_DATANG'
+        && this.isDatangMalamMenungguPulang(stateObj.datang, stateObj.status);
+      if (this.isTanggalHariIni(referensiWaktu) || masihMenungguPulangMalam) return false;
+      stateObj.status = 'BELUM_ABSEN';
+      stateObj.detail = '';
+      stateObj.datang = null;
+      stateObj.pulang = null;
+      stateObj.expired = false;
+      return true;
     },
     setMode(m) { 
       STATE.menuAbsenAktif = m; 
@@ -1583,9 +1632,17 @@
         return this.buildAttendanceState(null, lokal);
       }
 
-      const datang = sync.datang ? this.dataServerKeDataLokal(sync.datang) : null;
-      const pulang = sync.pulang ? this.dataServerKeDataLokal(sync.pulang) : null;
-      const keterangan = Array.isArray(sync.keterangan) ? sync.keterangan : [];
+      const datangAwal = sync.datang ? this.dataServerKeDataLokal(sync.datang) : null;
+      const pulangAwal = sync.pulang ? this.dataServerKeDataLokal(sync.pulang) : null;
+      // Pesan/status hanya berlaku pada hari ini. Satu-satunya pengecualian adalah
+      // Datang Dinas Malam kemarin yang masih menunggu absen Pulang pagi ini.
+      const pulang = pulangAwal && this.isTanggalHariIni(pulangAwal.timestampClient) ? pulangAwal : null;
+      const datang = datangAwal && (this.isTanggalHariIni(datangAwal.timestampClient)
+        || this.isDatangMalamMenungguPulang(datangAwal, 'DATANG') || pulang) ? datangAwal : null;
+      const keterangan = (Array.isArray(sync.keterangan) ? sync.keterangan : []).filter(function(k) {
+        const dataKeterangan = ENGINE.dataServerKeDataLokal(k);
+        return ENGINE.isTanggalHariIni(dataKeterangan.timestampClient);
+      });
       // Catatan pulang dapat berasal dari dinas sebelumnya. Jika server juga
       // mengirim absen datang yang lebih baru, tampilkan status datang agar
       // dinas malam yang baru dimulai tidak keliru dianggap sudah pulang.
@@ -1614,6 +1671,7 @@
 
       this.cekAbsenKadaluarsa(stateObj);
       this.cekKeteranganWaktuTiba(stateObj);
+      this.resetStatusJikaBedaHari(stateObj);
       STORAGE.simpanAbsensiHariIni(stateObj);
       return stateObj;
     },
@@ -1630,7 +1688,7 @@
       const isServerHariIni = row && this.isTanggalHariIni(soalTanggal);
       const rawStatus = String(row?.statusAbsen || row?.status || '').trim().toLowerCase();
       const detailServer = String(row?.detailAbsen || row?.detail || '').trim();
-      const isServerLintasHari = rawStatus === 'datang' && ['Dinas Malam','Dinas Sore + Malam','Dinas Malam + Pagi'].includes(detailServer);
+      const isServerLintasHari = rawStatus === 'datang' && this.isDinasLintasHari(detailServer) && this.isTanggalKemarin(soalTanggal);
 
       if (isServerHariIni || isServerLintasHari) {
         const s = rawStatus.toLowerCase();
@@ -1657,8 +1715,8 @@
         const tglDatangLokal = String(lokal.datang.timestampClient).slice(0,10);
         const tglHariIni = STORAGE.todayKey();
         const detailLokal = lokal.detail || lokal.datang.detailAbsen || '';
-        const isLintasHari = ['Dinas Malam', 'Dinas Sore + Malam', 'Dinas Malam + Pagi'].indexOf(detailLokal) !== -1;
-        const isDataLokaltodayOrLintasHari = (tglDatangLokal === tglHariIni) || (isLintasHari && tglDatangLokal < tglHariIni);
+        const isDataLokaltodayOrLintasHari = tglDatangLokal === tglHariIni
+          || this.isDatangMalamMenungguPulang(lokal.datang, lokal.status);
         
         if (isDataLokaltodayOrLintasHari) {
           const localRawStatus = String(lokal.status || '').trim();
@@ -1682,6 +1740,7 @@
 
       this.cekAbsenKadaluarsa(stateObj);
       this.cekKeteranganWaktuTiba(stateObj);
+      this.resetStatusJikaBedaHari(stateObj);
       STORAGE.simpanAbsensiHariIni(stateObj);
       return stateObj;
     },
@@ -1925,7 +1984,9 @@
           const stateLama = STATE.absensiHariIni.status;
           ENGINE.cekAbsenKadaluarsa(STATE.absensiHariIni);
           ENGINE.cekKeteranganWaktuTiba(STATE.absensiHariIni);
+          ENGINE.resetStatusJikaBedaHari(STATE.absensiHariIni);
           if (stateLama !== STATE.absensiHariIni.status) {
+            STORAGE.simpanAbsensiHariIni(STATE.absensiHariIni);
             this.renderStatusHariIni();
           }
         }
@@ -2517,6 +2578,86 @@ renderThumbnailFoto(foto) {
       this.show(DOM.rekapArea);
       DOM.rekapArea.scrollIntoView({behavior: 'smooth', block: 'start'});
     },
+    renderRiwayatRekapBulanan(data, bulan, tahun) {
+      if (!DOM.rekapArea || !DOM.rekapContent) return;
+      const rows = Array.isArray(data && data.rows) ? data.rows : [];
+      const ambil = function(row, nama) {
+        const target = String(nama).toLowerCase().replace(/[^a-z0-9]/g, '');
+        const key = Object.keys(row || {}).find(function(k) {
+          return String(k).toLowerCase().replace(/[^a-z0-9]/g, '') === target;
+        });
+        return key == null ? '' : row[key];
+      };
+      const nilai = function(row, daftar) {
+        for (let i = 0; i < daftar.length; i++) {
+          const v = ambil(row, daftar[i]);
+          if (v != null && String(v).trim() !== '') return String(v);
+        }
+        return '';
+      };
+      const namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+      const periode = (namaBulan[Number(bulan) - 1] || bulan || '-') + ' ' + (tahun || '');
+      if (!rows.length) {
+        DOM.rekapContent.className = 'status';
+        DOM.rekapContent.textContent = 'Belum ada riwayat pada rekap bulanan ' + periode + '.';
+        this.show(DOM.rekapArea);
+        return;
+      }
+      const waktuUrut = function(row) {
+        const tgl = nilai(row, ['tanggal', 'tgl', 'date']);
+        const jam = nilai(row, ['datang', 'jamDatang', 'jamMasuk', 'masuk', 'pulang', 'jamPulang']);
+        let tanggalISO = /^\d{4}-\d{2}-\d{2}/.test(tgl) ? tgl.slice(0, 10) : '';
+        const tglIndonesia = String(tgl || '').match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+        if (!tanggalISO && tglIndonesia) tanggalISO = tglIndonesia[3] + '-' + String(tglIndonesia[2]).padStart(2, '0') + '-' + String(tglIndonesia[1]).padStart(2, '0');
+        const waktu = String(jam || '').match(/\d{1,2}:\d{2}(?::\d{2})?/);
+        const nilaiWaktu = Date.parse(tanggalISO + 'T' + (waktu ? waktu[0] : '00:00:00'));
+        return isNaN(nilaiWaktu) ? 0 : nilaiWaktu;
+      };
+      const rowsUrut = rows.slice().sort(function(a, b) { return waktuUrut(b) - waktuUrut(a); });
+      DOM.rekapContent.className = 'riwayat-list';
+      DOM.rekapContent.innerHTML = rowsUrut.slice(0, 31).map(function(row) {
+        const tanggalAsli = nilai(row, ['tanggal', 'tgl', 'date']) || '-';
+        const tanggal = /^\d{4}-\d{2}-\d{2}/.test(tanggalAsli) ? tanggalAsli.slice(0, 10) : tanggalAsli.replace(/\s+\d{1,2}:\d{2}.*$/, '');
+        const detail = nilai(row, ['detailAbsen', 'dinas', 'status', 'jenis']) || '-';
+        const datang = nilai(row, ['datang', 'jamDatang', 'jamMasuk', 'masuk']);
+        const pulang = nilai(row, ['pulang', 'jamPulang', 'jamKeluar', 'keluar']);
+        let statusDatang = nilai(row, ['statusDatang', 'statusMasuk', 'ketDatang', 'keteranganDatang']);
+        let statusPulang = nilai(row, ['statusPulang', 'statusKeluar', 'ketPulang', 'keteranganPulang']);
+        const lokasiDatang = nilai(row, ['lokasiDatang', 'lokasiMasuk', 'lokasiAbsenDatang', 'lokasi']);
+        const lokasiPulang = nilai(row, ['lokasiPulang', 'lokasiKeluar', 'lokasiAbsenPulang']);
+        const bobot = nilai(row, ['bobot', 'nilai', 'skor', 'bebanKerja']);
+        const jamDatang = datang || '-';
+        const jamPulang = pulang || '-';
+        const formatJamKartu = function(jam) {
+          const cocok = String(jam || '').match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+          if (!cocok) return jam || '-';
+          return String(cocok[1]).padStart(2, '0') + '.' + cocok[2] + '.' + (cocok[3] || '00');
+        };
+        // Jika rekap belum menyertakan status, hitung dari detail dinas dan jam pada rekap.
+        const tanggalISO = /^\d{4}-\d{2}-\d{2}/.test(tanggalAsli) ? tanggalAsli.slice(0, 10) : '';
+        const cocokDatang = String(datang || '').match(/\d{1,2}:\d{2}/);
+        const cocokPulang = String(pulang || '').match(/\d{1,2}:\d{2}/);
+        if (tanggalISO && cocokDatang && !statusDatang) {
+          const waktu = new Date(tanggalISO + 'T' + cocokDatang[0]);
+          if (!isNaN(waktu.getTime())) statusDatang = ENGINE.statusDatang(detail, waktu);
+        }
+        if (tanggalISO && cocokPulang && !statusPulang) {
+          const waktu = new Date(tanggalISO + 'T' + cocokPulang[0]);
+          if (!isNaN(waktu.getTime())) statusPulang = ENGINE.statusPulang(detail, waktu);
+        }
+        const teksDatang = statusDatang ? '<span class="riwayat-status">' + UTIL.escapeHTML(statusDatang) + '</span>' : '';
+        const teksPulang = statusPulang ? '<span class="riwayat-status">' + UTIL.escapeHTML(statusPulang) + '</span>' : '';
+        const kartuDatang = (datang || statusDatang || lokasiDatang) ? '<div class="riwayat-absen-box"><div class="riwayat-absen-label">📥 DATANG</div><div class="riwayat-absen-info" title="Jam datang"><span>🕘</span><span>' + UTIL.escapeHTML(formatJamKartu(jamDatang)) + teksDatang + '</span></div><div class="riwayat-absen-info" title="Lokasi datang"><span>📍</span><span>' + UTIL.escapeHTML(lokasiDatang || '-') + '</span></div></div>' : '';
+        const kartuPulang = (pulang || statusPulang || lokasiPulang) ? '<div class="riwayat-absen-box pulang"><div class="riwayat-absen-label">📤 PULANG</div><div class="riwayat-absen-info" title="Jam pulang"><span>🕘</span><span>' + UTIL.escapeHTML(formatJamKartu(jamPulang)) + teksPulang + '</span></div><div class="riwayat-absen-info" title="Lokasi pulang"><span>📍</span><span>' + UTIL.escapeHTML(lokasiPulang || '-') + '</span></div></div>' : '';
+        const jumlahKartu = (kartuDatang ? 1 : 0) + (kartuPulang ? 1 : 0);
+        return '<div class="riwayat-card riwayat-rekap-card">'
+          + '<div class="riwayat-rekap-head"><div><div class="riwayat-rekap-date">📅 ' + UTIL.escapeHTML(tanggal) + ' - ' + UTIL.escapeHTML(detail) + '</div></div>'
+          + (bobot ? '<div class="riwayat-bobot" title="Bobot">⚖ ' + UTIL.escapeHTML(bobot) + '</div>' : '') + '</div>'
+          + (jumlahKartu ? '<div class="riwayat-absen-grid' + (jumlahKartu === 1 ? ' satu-kartu' : '') + '">' + kartuDatang + kartuPulang + '</div>' : '') + '</div>';
+      }).join('\n');
+      this.show(DOM.rekapArea);
+      DOM.rekapArea.scrollIntoView({behavior: 'smooth', block: 'start'});
+    },
     renderRiwayatLokal() {
       const r = STORAGE.ambilRiwayat(); if (!DOM.rekapArea||!DOM.rekapContent) return;
       if (!r.length) { DOM.rekapContent.className='status'; DOM.rekapContent.textContent='Belum ada riwayat absensi lokal.'; this.show(DOM.rekapArea); return; }
@@ -2893,9 +3034,26 @@ renderThumbnailFoto(foto) {
     async bukaRiwayatPegawai() {
       const id = this.getIdPegawaiAktif();
       UI.show(DOM.rekapArea);
-      if (DOM.rekapContent) { DOM.rekapContent.className = 'status warning'; DOM.rekapContent.textContent = 'Memuat riwayat...'; }
+      if (DOM.rekapContent) { DOM.rekapContent.className = 'status warning'; DOM.rekapContent.textContent = 'Memuat riwayat dari rekap bulanan...'; }
       if (!id) { UI.renderRiwayatLokal(); return; }
-      try { const res = await API.riwayatPegawai(id); if (res && res.sukses && Array.isArray(res.data)) UI.renderRiwayatServer(res.data); else UI.renderRiwayatLokal(); } catch (err) { UI.renderRiwayatLokal(); }
+      const sekarang = new Date();
+      const bulan = sekarang.getMonth() + 1;
+      const tahun = sekarang.getFullYear();
+      try {
+        let rekap = await STORAGE.ambilCacheBulananIDB(bulan, tahun, id);
+        if (!rekap) {
+          const res = await API.rekapBulanan(bulan, tahun, id);
+          if (!res || !res.sukses) throw new Error((res && res.pesan) || 'Rekap bulanan tidak tersedia.');
+          rekap = res.data || { rows: [] };
+          await STORAGE.simpanCacheBulananIDB(rekap, bulan, tahun, id);
+        }
+        UI.renderRiwayatRekapBulanan(rekap, bulan, tahun);
+      } catch (err) {
+        if (DOM.rekapContent) {
+          DOM.rekapContent.className = 'status error';
+          DOM.rekapContent.textContent = 'Gagal memuat riwayat dari rekap bulanan. ' + err.message;
+        }
+      }
     },
 
     async muatAdminDariCache() {
