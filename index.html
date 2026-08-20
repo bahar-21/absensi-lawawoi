@@ -23,6 +23,173 @@
     .dev-footer { position: fixed; right: 8px; bottom: 6px; z-index: 999; background: rgba(255,255,255,.92); color: #475569; padding: 2px 8px; font-size: 9px; font-weight: 500; letter-spacing: .2px; border-radius: 6px; pointer-events: none; user-select: none; }
     .hidden { display: none !important; }
 
+    /* =========================================================
+       SPLASH SCREEN - tampil saat memuat aplikasi & saat refresh
+    ========================================================= */
+    #splashScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f766e 0%, #115e59 50%, #134e4a 100%);
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+      overflow: hidden;
+    }
+    #splashScreen::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 60%);
+      animation: splashBgRotate 12s linear infinite;
+      pointer-events: none;
+    }
+    #splashScreen::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.06) 0%, transparent 35%),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,0.06) 0%, transparent 35%);
+      pointer-events: none;
+    }
+    #splashScreen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    @keyframes splashBgRotate {
+      to { transform: rotate(360deg); }
+    }
+
+    .splash-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .splash-logo {
+      width: 118px;
+      height: 118px;
+      margin-bottom: 22px;
+      filter: drop-shadow(0 12px 24px rgba(0,0,0,0.28));
+      animation: splashPulse 1.6s ease-in-out infinite;
+    }
+    @keyframes splashPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    .splash-title {
+      color: #ffffff;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      margin: 0;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.22);
+      line-height: 1.15;
+    }
+    .splash-subtitle {
+      color: rgba(255,255,255,0.88);
+      font-size: 14px;
+      font-weight: 700;
+      margin: 8px 0 0;
+      letter-spacing: 0.4px;
+    }
+
+    .splash-loader {
+      margin-top: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .splash-spinner {
+      width: 42px;
+      height: 42px;
+      border: 3px solid rgba(255,255,255,0.22);
+      border-top-color: #ffffff;
+      border-right-color: rgba(255,255,255,0.85);
+      border-radius: 50%;
+      animation: splashSpin 0.85s linear infinite;
+      box-shadow: 0 0 20px rgba(255,255,255,0.12);
+    }
+    @keyframes splashSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    .splash-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .splash-dots span {
+      width: 8px;
+      height: 8px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 50%;
+      animation: splashDot 1.4s ease-in-out infinite;
+    }
+    .splash-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .splash-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes splashDot {
+      0%, 80%, 100% { transform: scale(0.55); opacity: 0.45; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    .splash-loading-text {
+      color: rgba(255,255,255,0.95);
+      font-size: 13px;
+      font-weight: 700;
+      margin: 6px 0 0;
+      letter-spacing: 0.5px;
+    }
+
+    .splash-progress {
+      position: relative;
+      width: 220px;
+      height: 4px;
+      margin-top: 18px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .splash-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 40%;
+      background: linear-gradient(90deg, transparent, #ffffff, transparent);
+      border-radius: 999px;
+      animation: splashProgress 1.6s ease-in-out infinite;
+    }
+    @keyframes splashProgress {
+      0% { left: -40%; }
+      100% { left: 100%; }
+    }
+
+    .splash-footer {
+      position: absolute;
+      bottom: 26px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: rgba(255,255,255,0.7);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      z-index: 2;
+    }
+
     .header { position: relative; margin: -18px -18px 14px; padding: 18px 16px 14px; background: linear-gradient(135deg, #0f766e, #115e59); color: white; border-radius: 0 0 24px 24px; box-shadow: 0 8px 18px rgba(15, 118, 110, .20); }
     .header-inner { display: flex; align-items: center; justify-content: center; gap: 10px; text-align: center; }
     .header h1 { margin: 0; line-height: 1.1; font-size: 18px; letter-spacing: .3px; }
@@ -34,7 +201,7 @@
     label { display: block; margin: 12px 0 6px; font-size: 13px; font-weight: 700; color: #334155; }
     input, select, textarea { width: 100%; padding: 13px; border: 1px solid #cbd5e1; border-radius: 13px; font-size: 15px; background: #ffffff; outline: none; }
     input:focus, select:focus, textarea:focus { border-color: #0f766e; box-shadow: 0 0 0 3px rgba(15, 118, 110, .14); }
-    button { width: 100%; border: none; border-radius: 15px; padding: 14px; font-size: 13px; font-weight: 800; cursor: pointer; margin-top: 12px; position: relative; }
+    button { width: 100%; border: none; border-radius: 15px; padding: 14px; font-size: 13px; font-weight: 800; cursor: pointer; margin-top: 12px; }
     button:disabled { opacity: .65; cursor: not-allowed; }
     .btn-main { background: #0f766e; color: white; }
     .btn-main:hover { background: #115e59; }
@@ -87,6 +254,7 @@
     .absen-selesai-title { font-weight: 900; font-size: 14px; margin-bottom: 8px; color: #14532d; display: flex; align-items: center; gap: 6px; }
     .absen-selesai-grid { display: grid; gap: 4px; border-top: 1px dashed #bbf7d0; padding-top: 8px; margin-top: 8px; }
 
+    /* FIX #10B: Style untuk summary card SELESAI absensi */
     .summary-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
     .summary-card-title { font-size: 12px; font-weight: 900; color: #0f766e; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.3px; }
     .thumbnail-absen { display: flex; justify-content: center; align-items: center; }
@@ -240,6 +408,7 @@
         margin-bottom:10px;
     }
 
+    /* FIX: Dashboard chart styles */
     .dashboard-chart { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-top: 12px; }
     .dashboard-chart-title { font-size: 12px; font-weight: 900; color: #0f766e; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.3px; }
     .chart-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; }
@@ -248,90 +417,39 @@
     .chart-bar-fill { height: 100%; background: linear-gradient(90deg, #0f766e, #14b8a6); border-radius: 9px; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; color: white; font-size: 10px; font-weight: 800; min-width: 24px; }
     .chart-bar-empty { color: #94a3b8; font-style: italic; font-size: 11px; padding-left: 8px; }
 
-    /* =============================================
-       BUTTON-LEVEL LOADING (ringan)
-    ============================================= */
-    .btn-loading { color: transparent !important; pointer-events: none; }
-    .btn-loading::after {
-      content: "";
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      top: 50%;
-      left: 50%;
-      margin-top: -8px;
-      margin-left: -8px;
-      border: 2px solid rgba(255,255,255,.35);
-      border-top-color: #ffffff;
-      border-radius: 50%;
-      animation: btnSpin .7s linear infinite;
-    }
-    .btn-secondary.btn-loading::after {
-      border-color: rgba(15,23,42,.15);
-      border-top-color: #0f172a;
-    }
-    @keyframes btnSpin { to { transform: rotate(360deg); } }
-
-    /* =============================================
-       PENGINGAT ABSEN PULANG (ringan)
-    ============================================= */
-    .absen-reminder {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      background: #f59e0b;
-      color: #fff;
-      padding: 12px 16px;
-      z-index: 99998;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.2);
-      animation: reminderIn .35s ease-out;
-      font-size: 13px;
-      font-weight: 700;
-    }
-    .absen-reminder.critical {
-      background: #dc2626;
-      animation: reminderIn .35s ease-out, reminderPulse 1.5s infinite;
-    }
-    .absen-reminder-icon { font-size: 22px; flex-shrink: 0; }
-    .absen-reminder-text { flex: 1; line-height: 1.3; min-width: 0; }
-    .absen-reminder-text small { display: block; font-size: 11px; opacity: .9; font-weight: 600; }
-    .absen-reminder-btn {
-      background: #fff;
-      color: #d97706;
-      border: 0;
-      padding: 7px 12px;
-      border-radius: 8px;
-      font-weight: 800;
-      font-size: 12px;
-      cursor: pointer;
-      margin: 0;
-      width: auto;
-      flex-shrink: 0;
-    }
-    .absen-reminder.critical .absen-reminder-btn { color: #b91c1c; }
-    .absen-reminder-close {
-      background: transparent;
-      border: 0;
-      color: #fff;
-      font-size: 18px;
-      cursor: pointer;
-      padding: 4px 8px;
-      margin: 0;
-      width: auto;
-      opacity: .8;
-    }
-    @keyframes reminderIn { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-    @keyframes reminderPulse { 
-      0%, 100% { box-shadow: 0 4px 12px rgba(0,0,0,.2); }
-      50% { box-shadow: 0 4px 24px rgba(220,38,38,.6); }
-    }
   </style>
 </head>
 <body>
-  <!-- Container untuk reminder -->
-  <div id="absenReminderHost"></div>
+  <!-- =========================================================
+       SPLASH SCREEN - tampil otomatis saat halaman dimuat
+       dan setiap kali pengguna melakukan refresh.
+  ========================================================= -->
+  <div id="splashScreen" aria-live="polite" aria-busy="true">
+    <div class="splash-content">
+      <div class="splash-logo" aria-hidden="true">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="48" fill="rgba(255,255,255,0.10)"/>
+          <circle cx="50" cy="50" r="40" fill="rgba(255,255,255,0.18)"/>
+          <circle cx="50" cy="50" r="34" fill="#ffffff"/>
+          <path d="M50 24 L50 76" stroke="#0f766e" stroke-width="11" stroke-linecap="round"/>
+          <path d="M24 50 L76 50" stroke="#0f766e" stroke-width="11" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 class="splash-title">Absensi Digital</h1>
+      <p class="splash-subtitle">UPT Puskesmas Lawawoi</p>
+      <div class="splash-loader" aria-hidden="true">
+        <div class="splash-spinner"></div>
+        <div class="splash-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <p class="splash-loading-text">Memuat aplikasi...</p>
+      <div class="splash-progress" aria-hidden="true">
+        <div class="splash-progress-bar"></div>
+      </div>
+    </div>
+    <div class="splash-footer">v26.8.01 • by : bahar_sidrap @ 2026</div>
+  </div>
 
   <div class="app" id="app">
 
@@ -383,7 +501,7 @@
       <div class="nik-row">
         <input id="inputIdPegawai" type="tel" inputmode="numeric" maxlength="20" pattern="[0-9]*"
                placeholder="Masukkan ID Pegawai" autocomplete="off" />
-        <button type="button" id="btnCheckEmployee" class="btn-main" data-action="check-employee">Cek ID</button>
+        <button type="button" class="btn-main" data-action="check-employee">Cek ID</button>
       </div>
       <div class="note">Gunakan ID Pegawai resmi yang diberikan admin aplikasi.</div>
       <div id="registerMessage" class="status hidden"></div>
@@ -451,16 +569,14 @@
       <div class="admin-header-row">
         <h3 class="small-title">Rekap</h3>
         <div class="admin-header-actions">
-          
+
   <button type="button"
-    id="btnCopyBelum"
     class="admin-copy-btn"
     data-action="copy-belum"
     title="Salin daftar belum absen"
-    aria-label="Salin daftar belum absen">⧉</button>
+    aria-label="Salin daftar belum absen"> </button>
 
   <button type="button"
-    id="btnUpdateRekap"
     class="admin-copy-btn"
     data-action="update-rekap"
     title="Update Rekap"
@@ -476,7 +592,6 @@
 
 </div>
       </div>
-      <div id="adminStatus" class="status hidden"></div>
 
       <div id="adminArea">
         <div class="admin-section-tabs">
@@ -510,7 +625,7 @@
 
           <div id="adminDetail" class="admin-mini-panel hidden"></div>
 
-          <button id="btnRefreshAdmin" type="button" class="btn-secondary" data-action="refresh-admin" style="margin-top:10px">Refresh Rekap</button>
+          <button type="button" class="btn-secondary" data-action="refresh-admin" style="margin-top:10px">Refresh Rekap</button>
         </div>
 
         <div id="adminBulananArea" class="hidden">
@@ -532,7 +647,7 @@
           </div>
           <div class="monthly-actions">
             <button id="btnTampilkanRekap" type="button" class="btn-main" data-action="load-monthly-recap">Tampilkan Rekap</button>
-            <button id="btnDownloadCsv" type="button" class="btn-secondary" data-action="download-monthly-csv">Download CSV</button>
+            <button type="button" class="btn-secondary" data-action="download-monthly-csv">Download CSV</button>
           </div>
           <div id="rekapBulananInfo" class="monthly-note">Pilih bulan, tahun, dan pegawai lalu tekan Tampilkan Rekap.</div>
           <div id="rekapBulananTable" class="table-wrap hidden"></div>
@@ -560,7 +675,7 @@
         <video id="video" autoplay playsinline muted aria-label="Pratinjau kamera"></video>
         <div class="face-guide" aria-hidden="true"></div>
       </div>
-      <button type="button" id="btnCapturePhoto" class="btn-main" data-action="capture-photo">Ambil Foto</button>
+      <button type="button" class="btn-main" data-action="capture-photo">Ambil Foto</button>
       <button type="button" class="btn-secondary" data-action="close-camera">Kembali</button>
     </section>
 
@@ -626,8 +741,7 @@
         <option value="">Pilih keterangan</option>
         <option value="Libur">Libur</option><option value="Sakit">Sakit</option>
         <option value="Lepas Malam">Lepas Malam</option><option value="Cuti">Cuti</option>
-        <option value="Ijin">Ijin (Potong Cuti)</option>
-        <option value="Dinas Luar">Dinas Luar</option>
+        <option value="Ijin">Ijin (Potong Cuti)</option><option value="Dinas Luar">Dinas Luar</option>
       </select>
       <label for="adminKeteranganCatatan" style="display:block; margin-top:10px">Keterangan</label>
       <textarea id="adminKeteranganCatatan" rows="3" placeholder="Isi keterangan bila diperlukan" style="width:100%; resize:vertical"></textarea>
@@ -665,7 +779,7 @@
     INDEXEDDB_NAME: 'absensi_lawawoi_db',
     INDEXEDDB_VERSION: 1,
     RIWAYAT_LIMIT: 30,
-    CLEANUP_ABSEN_HARI: 3,
+    CLEANUP_ABSEN_HARI: 2,
     STORAGE_PREFIX: 'absensi_lawawoi_',
     FOTO_MAX_WIDTH: 280,
     FOTO_QUALITY: 0.70,
@@ -677,7 +791,6 @@
       radius: 100
     },
     LOCK_SETELAH_KIRIM_MS: 30000,
-    API_TIMEOUT_MS: 30000,
    
     JADWAL_DINAS: {
       Datang: [
@@ -727,58 +840,22 @@
       detail: "",
       datang: null,
       pulang: null,
-      expired: false,
-      _tanggalTugas: null,
-      _lintasHariDinasMalam: false
+      expired: false
     }
   };
 
+  // FIX: Face detection interval handle (ditempatkan di scope global yang aman)
   let deteksiWajahInterval = null;
   let wajahTerdeteksi = false;
   let modelWajahSiap = false;
-
-  /* ============================================================
-     BUTTON-LEVEL LOADING HELPER
-  ============================================================ */
-  const BTN_LOADING = {
-    set(btn, loading) {
-      if (!btn) return;
-      if (loading) {
-        if (btn.dataset.originalText === undefined) {
-          btn.dataset.originalText = btn.textContent;
-        }
-        btn.disabled = true;
-        btn.classList.add('btn-loading');
-        btn.setAttribute('aria-busy', 'true');
-      } else {
-        btn.disabled = false;
-        btn.classList.remove('btn-loading');
-        btn.removeAttribute('aria-busy');
-        if (btn.dataset.originalText !== undefined) {
-          btn.textContent = btn.dataset.originalText;
-          delete btn.dataset.originalText;
-        }
-      }
-    },
-    findByAction(action) {
-      return document.querySelector('[data-action="' + action + '"]');
-    },
-    setByAction(action, loading) {
-      this.set(this.findByAction(action), loading);
-    },
-    resetAll() {
-      document.querySelectorAll('.btn-loading').forEach(function(b) {
-        BTN_LOADING.set(b, false);
-      });
-    }
-  };
 
   /* DOM */
   const DOM = {};
   function initDOM() {
     const explicitIds = [
       'networkBadgeInline', 'networkTextInline', 'registerArea', 'formArea', 'adminPage', 'adminArea',
-      'cameraArea', 'previewArea', 'rekapArea', 'rekapContent', 'statusBox', 'adminStatus', 'registerMessage', 'inputIdPegawai', 'pegawaiHeader', 'namaPegawaiDisplay',
+      'cameraArea', 'previewArea', 'rekapArea', 'rekapContent', 'statusBox',
+      'registerMessage', 'inputIdPegawai', 'pegawaiHeader', 'namaPegawaiDisplay',
       'nama', 'idPegawai', 'jabatanPegawai', 'unitPegawai', 'detailAbsen',
       'keterangan', 'btnAdminPage', 'btnSwitchUser', 'headerMenuPanel', 'btnModeHadir', 'btnModeKeterangan',
       'jamHariIni', 'tanggalHariIni', 'video', 'canvas', 'previewFoto', 'btnKirim', 'btnGps', 'btnUlangGps',
@@ -792,8 +869,7 @@
       'absenDatangSummary', 'summaryThumbContainer', 'summaryThumb', 'summaryDatangTitle', 'summaryDatangText',
       'formAbsensiFields', 'labelDetailAbsen', 'labelKeterangan', 'btnMulaiAbsen',
       'formAbsensiTitle', 'noteFormAbsensi',
-      'containerDetailAbsen', 'containerKeterangan', 'infoSelesaiAbsen', 'modeSwitch',
-      'btnCheckEmployee', 'btnCapturePhoto', 'btnRefreshAdmin', 'btnUpdateRekap', 'btnCopyBelum', 'btnDownloadCsv'
+      'containerDetailAbsen', 'containerKeterangan', 'infoSelesaiAbsen', 'modeSwitch'
     ];
     explicitIds.forEach(function(id) { DOM[id] = document.getElementById(id); });
   }
@@ -892,43 +968,22 @@
         detail: "",
         datang: null,
         pulang: null,
-        expired: false,
-        _tanggalTugas: null
+        expired: false
       }); 
     },
-    
     ambilAbsensiAktif() {
       const prefix = CONFIG.STORAGE_PREFIX + 'absen_hari_ini_';
       const now = Date.now();
-      const BATAS_MS_LINTAS_HARI = 36 * 60 * 60 * 1000;
-      const tglHariIni = STORAGE.todayKey();
-      
+      const BATAS_MS = 48 * 60 * 60 * 1000;
       let terbaik = null;
       let terbaikTgl = 0;
-      
       Object.keys(localStorage).forEach(function(k) {
         if (!k.startsWith(prefix)) return;
         try {
           const v = JSON.parse(localStorage.getItem(k) || '{}');
           if (!v || v.status === "BELUM_ABSEN") return;
-          if (!v.datang || !v.datang.timestampClient) return;
-          
-          const tsDatang = new Date(v.datang.timestampClient).getTime();
-          const tglDatang = String(v.datang.timestampClient).slice(0, 10);
-          
-          if (tsDatang && (now - tsDatang) > BATAS_MS_LINTAS_HARI) return;
-          
-          const detail = v.detail || (v.datang.detailAbsen || '');
-          const DINAS_LINTAS_HARI = ['Dinas Malam', 'Dinas Sore + Malam', 'Dinas Malam + Pagi'];
-          const isLintasHari = DINAS_LINTAS_HARI.indexOf(detail) !== -1;
-          
-          if (tglDatang !== tglHariIni && !isLintasHari) return;
-          
-          if (isLintasHari && tglDatang !== tglHariIni) {
-            const selisihHari = Math.round((new Date(tglHariIni) - new Date(tglDatang)) / (24*60*60*1000));
-            if (selisihHari > 1) return;
-          }
-          
+          const tsDatang = v.datang && v.datang.timestampClient ? new Date(v.datang.timestampClient).getTime() : 0;
+          if (tsDatang && (now - tsDatang) > BATAS_MS) return;
           if (tsDatang > terbaikTgl) {
             terbaikTgl = tsDatang;
             terbaik = v;
@@ -937,32 +992,11 @@
       });
       return terbaik || this.ambilAbsensiHariIni();
     },
-    
     simpanAbsensiHariIni(d) {
-      let tglKey;
-      if (d._tanggalTugas) {
-        tglKey = d._tanggalTugas;
-      } else if (d.datang && d.datang.tanggalTugas) {
-        tglKey = d.datang.tanggalTugas;
-      } else if (d.datang && d.datang.timestampClient) {
-        const detail = d.detail || (d.datang.detailAbsen || '');
-        const DINAS_LINTAS_HARI = ['Dinas Malam', 'Dinas Sore + Malam', 'Dinas Malam + Pagi'];
-        const isLintasHari = DINAS_LINTAS_HARI.indexOf(detail) !== -1;
-        if (isLintasHari) {
-          tglKey = String(d.datang.timestampClient).slice(0, 10);
-        } else {
-          tglKey = STORAGE.todayKey();
-        }
-      } else {
-        tglKey = STORAGE.todayKey();
-      }
-      
-      if (!d._tanggalTugas) d._tanggalTugas = tglKey;
-      
+      let tglKey = d._tanggalTugas || d.tanggalTugas || STORAGE.todayKey();
       const k = this.absenHariIniKey(tglKey);
       this.write(k, d);
     },
-    
     riwayatKey() { return this.key('riwayat_absensi'); },
     ambilRiwayat() { return this.read(this.riwayatKey(), []); },
     simpanRiwayat(l) { this.write(this.riwayatKey(), l.slice(0, CONFIG.RIWAYAT_LIMIT)); },
@@ -983,6 +1017,11 @@
     },
     simpanCacheAdmin(d, t) { this.write(this.adminCacheKey(t || this.todayKey()), { waktu: Date.now(), data: d }); },
 
+    /* =====================================================
+     * INDEXEDDB - CACHE REKAP ADMIN
+     * Cache lokal khusus rekap harian, bulanan, dashboard.
+     * localStorage tetap dipertahankan sebagai fallback.
+     * ===================================================== */
     _idb: null,
     _idbPromise: null,
 
@@ -1103,9 +1142,43 @@
     resetPerangkatLokal() { Object.keys(localStorage).forEach(function(k) { if (k.startsWith(CONFIG.STORAGE_PREFIX)) localStorage.removeItem(k); }); }
   };
 
-  /* ============================================================
-     API - TANPA GLOBAL LOADING OVERLAY
-  ============================================================ */
+  /* =========================================================
+     SPLASH SCREEN
+     Tampil otomatis saat halaman dimuat (initial load) dan
+     setiap kali pengguna melakukan refresh (Ctrl+R / menu Refresh).
+     Otomatis tertutup dengan animasi fade ketika APP.mulai() selesai.
+  ========================================================= */
+  const SPLASH = {
+    show() {
+      const el = document.getElementById('splashScreen');
+      if (!el) return;
+      el.classList.remove('hidden');
+      el.style.opacity = '1';
+      el.style.visibility = 'visible';
+      el.style.pointerEvents = 'auto';
+    },
+    hide() {
+      const el = document.getElementById('splashScreen');
+      if (!el) return;
+      el.style.opacity = '0';
+      el.style.visibility = 'hidden';
+      el.style.pointerEvents = 'none';
+      setTimeout(function() { el.classList.add('hidden'); }, 650);
+    }
+  };
+
+  /* =========================================================
+     GLOBAL LOADING (nonaktif)
+     Splash screen menggantikan overlay ini. Status box tetap
+     menampilkan umpan balik selama proses data dikirim/diambil.
+  ========================================================= */
+  const GLOBAL_LOADING = {
+    count: 0,
+    show(text) { /* no-op: diganti splash screen */ },
+    hide() { /* no-op */ },
+    reset() { /* no-op */ }
+  };
+
   const API = {
     buildURL(p) {
       const u = new URL(CONFIG.WEB_APP_URL);
@@ -1118,75 +1191,55 @@
       return new Promise(function(resolve, reject) {
         const cn = 'jsonp_absensi_' + Date.now() + '_' + Math.floor(Math.random()*100000);
         const s = document.createElement('script');
-        let settled = false;
-        
-        const cleanup = function() {
-          clearTimeout(t);
-          if (window[cn]) delete window[cn];
-          if (s.parentNode) s.parentNode.removeChild(s);
-        };
-        
         const t = setTimeout(function() { 
-          if (settled) return;
-          settled = true;
-          cleanup();
+          if (window[cn]) delete window[cn]; 
+          if (s.parentNode) s.parentNode.removeChild(s); 
           reject(new Error('Server lambat atau tidak merespons. Silakan coba lagi.')); 
         }, tm);
-        
         window[cn] = function(d) { 
-          if (settled) return;
-          settled = true;
-          cleanup();
+          clearTimeout(t); 
+          delete window[cn]; 
+          if (s.parentNode) s.parentNode.removeChild(s); 
           resolve(d); 
         };
-        
         const u = new URL(CONFIG.WEB_APP_URL);
         const m = Object.assign({ token: CONFIG.SHARED_SECRET }, p || {});
         Object.keys(m).forEach(function(k) { if (m[k] !== undefined && m[k] !== null) u.searchParams.set(k, m[k]); });
         u.searchParams.set('callback', cn); 
         u.searchParams.set('_t', Date.now());
         s.src = u.toString();
-        
         s.onerror = function() { 
-          if (settled) return;
-          settled = true;
-          cleanup();
+          clearTimeout(t); 
+          if (window[cn]) delete window[cn];
+          if (s.parentNode) s.parentNode.removeChild(s); 
           reject(new Error('Gagal menghubungi server. Periksa koneksi internet atau tekan Reset Perangkat lalu coba lagi.')); 
         };
-        
         document.body.appendChild(s);
       });
     },
     async get(p, tm) {
-      return await this.jsonp(p, tm);
+      GLOBAL_LOADING.show('Mengambil data...');
+      try {
+        return await this.jsonp(p, tm);
+      } finally {
+        GLOBAL_LOADING.hide();
+      }
     },
-    async post(d, tm) {
-      tm = tm || CONFIG.API_TIMEOUT_MS;
-      const controller = new AbortController();
-      const timeoutId = setTimeout(function() { controller.abort(); }, tm);
-      
+    async post(d) {
+      GLOBAL_LOADING.show('Mengirim data...');
       try {
         const body = Object.assign({ token: CONFIG.SHARED_SECRET }, d);
-        const r = await fetch(CONFIG.WEB_APP_URL, { 
-          method: 'POST', 
-          body: JSON.stringify(body),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
+        const r = await fetch(CONFIG.WEB_APP_URL, { method: 'POST', body: JSON.stringify(body) });
         if (!r.ok) throw new Error('Gagal mengirim data. Kode: ' + r.status);
         return await r.json();
-      } catch (err) {
-        clearTimeout(timeoutId);
-        if (err.name === 'AbortError') {
-          throw new Error('Server tidak merespons dalam ' + Math.round(tm/1000) + ' detik. Data absensi mungkin sudah tersimpan - coba Refresh.');
-        }
-        throw err;
+      } finally {
+        GLOBAL_LOADING.hide();
       }
     },
     cekPegawai(id) { return this.get({ aksi: 'cekNIK', nik: id }); },
     cekRiwayatTerakhir(id) { return this.get({ aksi: 'cekRiwayatTerakhir', idPegawai: id }); },
     rekapAdminHariIni(t) { return this.get({ aksi: 'rekapHariIni', tanggal: t || STORAGE.todayKey() }, 45000); },
-    updateRekap() { return this.get({ aksi: 'updateRekap' }, 60000); },
+    updateRekap() {return this.get({ aksi: 'updateRekap' }, 45000);},
     dashboardBulanan(b, t) { return this.get({ aksi: 'dashboardBulanan', bulan: b, tahun: t }, 45000); },
     simpanAbsensiAdmin(d) { return this.get(Object.assign({ aksi: 'simpanAbsensiAdmin' }, d || {})); },
     rekapBulanan(b, t, id) { return this.get({ aksi: 'rekapBulanan', bulan: b, tahun: t, idPegawai: id || 'SEMUA' }); },
@@ -1196,8 +1249,6 @@
   };
 
   const ENGINE = {
-    DINAS_LINTAS_HARI: ['Dinas Malam', 'Dinas Sore + Malam', 'Dinas Malam + Pagi'],
-    
     jamKeMenit(j) { const b = String(j || '00:00').split(':').map(Number); return ((b[0]||0)*60) + (b[1]||0); },
     hariIni() { return new Date().getDay(); },
 
@@ -1220,6 +1271,7 @@
         if (this.isTesterMode()) return CONFIG.JADWAL_DINAS.Keterangan.map(function(j){return j.nama;});
         const m = this.menitSekarang();
         
+        // FIX #19: Logic custom untuk Dinas Sore/Malam
         const r = CONFIG.JADWAL_DINAS.Keterangan.filter(function(j){
           const nama = (j.nama || '').toLowerCase();
           if (nama === 'dinas sore') return m < 13 * 60 + 45;
@@ -1296,7 +1348,7 @@
       const parsedLat = parseFloat(this.normCoord(lok.latitude));
       const parsedLng = parseFloat(this.normCoord(lok.longitude));
 
-      const isShiftMalam = this.DINAS_LINTAS_HARI.indexOf(det) !== -1;
+      const isShiftMalam = ['Dinas Malam', 'Dinas Sore + Malam', 'Dinas Malam + Pagi'].indexOf(det) !== -1;
 
       return {
         idPegawai: p.idPegawai || p.nik || '',
@@ -1317,7 +1369,7 @@
       };
     },
     tanggalTugasAbsensi(s, d, dt) {
-      const isShiftMalam = this.DINAS_LINTAS_HARI.indexOf(d) !== -1;
+      const isShiftMalam = ['Dinas Malam', 'Dinas Sore + Malam', 'Dinas Malam + Pagi'].indexOf(d) !== -1;
       if (s === 'Pulang' && isShiftMalam && dt && dt.timestampClient) {
         return String(dt.timestampClient).slice(0,10);
       }
@@ -1354,6 +1406,7 @@
         timestampClient: row.timestampClient || row.timestampServer || new Date().toISOString(),
         linkFoto: row.linkFoto || '',
         fotoBase64: row.fotoBase64 || '',
+        key: row.key || row.Key || row.KEY || '',
         tanggalTugas: String(row.tanggal || '').slice(0, 10) || STORAGE.todayKey()
       };
     },
@@ -1494,7 +1547,7 @@
       const wd = d.timestampClient ? new Date(d.timestampClient) : new Date();
       const wp = p.timestampClient ? new Date(p.timestampClient) : new Date();
       const detail = p.detailAbsen || d.detailAbsen || p.detail || d.detail;
-      const isMalam = this.DINAS_LINTAS_HARI.indexOf(detail) !== -1;
+      const isMalam = ['Dinas Malam','Dinas Sore + Malam','Dinas Malam + Pagi'].includes(detail);
       const im = isMalam ? '\nStatus hari ini otomatis: Lepas Malam' : '';
       let selisihText = '-';
       if (wd && wp && !isNaN(wd.getTime()) && !isNaN(wp.getTime())) {
@@ -1515,192 +1568,55 @@
       return ['Tanggal: ' + UTIL.tanggalIndonesia(new Date()),'Pukul: ' + UTIL.jamIndonesia(new Date()),'Keterangan: ' + (d.keterangan||'')].join('\n');
     },
     
+    // Sinkronisasi server menjadi sumber kebenaran saat cache/localStorage kosong.
+    // Server mengirim pasangan Datang/Pulang melalui cekRiwayatTerakhir().sinkron.
     buildAttendanceStateFromSync(sync, lokal) {
-  const stateObj = {
-    status: "BELUM_ABSEN",
-    detail: "",
-    datang: null,
-    pulang: null,
-    expired: false,
-    _tanggalTugas: null,
-    _lintasHariDinasMalam: false
-  };
+      const stateObj = {
+        status: "BELUM_ABSEN",
+        detail: "",
+        datang: null,
+        pulang: null,
+        expired: false
+      };
 
-  if (!sync) {
-    return this.buildAttendanceState(null, lokal);
-  }
-
-  const datang = sync.datang ? this.dataServerKeDataLokal(sync.datang) : null;
-  const pulang = sync.pulang ? this.dataServerKeDataLokal(sync.pulang) : null;
-  const keterangan = Array.isArray(sync.keterangan) ? sync.keterangan : [];
-
-  const tglHari = STORAGE.todayKey();
-
-  // ============================================================
-  // FILTER AKTIVITAS BERDASARKAN TANGGAL TUGAS
-  // Aktivitas kemarin tidak boleh menjadi status hari ini.
-  // Pengecualian: Dinas Malam lintas hari.
-  // ============================================================
-
-  const tanggalTugasDatang = datang && datang.tanggalTugas
-    ? String(datang.tanggalTugas).slice(0, 10)
-    : null;
-
-  const tanggalTugasPulang = pulang && pulang.tanggalTugas
-    ? String(pulang.tanggalTugas).slice(0, 10)
-    : null;
-
-  const tanggalTugasKeterangan = keterangan.length && keterangan[0].tanggalTugas
-    ? String(keterangan[0].tanggalTugas).slice(0, 10)
-    : null;
-
-  const detailDatang = datang
-    ? (datang.detailAbsen || sync.detail || "")
-    : "";
-
-  const isDinasMalam = this.DINAS_LINTAS_HARI.indexOf(detailDatang) !== -1;
-
-  // Dinas malam boleh tetap aktif jika datang kemarin
-  // dan hari ini masih merupakan hari berikutnya.
-  const datangDinasMalamLintasHari =
-    datang &&
-    isDinasMalam &&
-    tanggalTugasDatang &&
-    tanggalTugasDatang !== tglHari &&
-    String(datang.timestampClient || '').slice(0, 10) !== tglHari;
-
-  // Jika tanggal tugas transaksi bukan hari ini dan bukan
-  // pengecualian dinas malam lintas hari, transaksi diabaikan.
-  const datangHariIni =
-    datang &&
-    (
-      tanggalTugasDatang === tglHari ||
-      datangDinasMalamLintasHari
-    );
-
-  const pulangHariIni =
-    pulang &&
-    (
-      tanggalTugasPulang === tglHari ||
-      (
-        tanggalTugasDatang &&
-        tanggalTugasDatang !== tglHari &&
-        this.DINAS_LINTAS_HARI.indexOf(
-          pulang.detailAbsen || detailDatang || ""
-        ) !== -1
-      )
-    );
-
-  const keteranganHariIni =
-    keterangan.length &&
-    (
-      tanggalTugasKeterangan === tglHari ||
-      String(keterangan[0].tanggal || keterangan[0].timestampClient || '').slice(0, 10) === tglHari
-    );
-
-  // ============================================================
-  // KETERANGAN HARI INI
-  // ============================================================
-
-  if (keteranganHariIni) {
-    const k = keterangan[0];
-
-    stateObj.status = "KETERANGAN";
-    stateObj.detail = k.detailAbsen || k.keterangan || "";
-    stateObj.datang = this.dataServerKeDataLokal(k);
-    stateObj.pulang = null;
-    stateObj._tanggalTugas = tanggalTugasKeterangan || tglHari;
-
-  // ============================================================
-  // PULANG
-  // ============================================================
-
-  } else if (
-    pulangHariIni &&
-    (!datangHariIni ||
-      new Date(pulang.timestampClient) >= new Date(datang.timestampClient))
-  ) {
-    stateObj.status = "SELESAI";
-    stateObj.detail =
-      pulang.detailAbsen ||
-      (datangHariIni && datang.detailAbsen) ||
-      sync.detail ||
-      "";
-
-    stateObj.datang = datangHariIni
-      ? datang
-      : (lokal && lokal.datang) || null;
-
-    stateObj.pulang = pulang;
-
-    stateObj._tanggalTugas =
-      (datangHariIni && datang.tanggalTugas) ||
-      pulang.tanggalTugas ||
-      (lokal && lokal._tanggalTugas) ||
-      tglHari;
-
-  // ============================================================
-  // DATANG
-  // ============================================================
-
-  } else if (datangHariIni) {
-    stateObj.status = "SUDAH_DATANG";
-    stateObj.detail = datang.detailAbsen || sync.detail || "";
-    stateObj.datang = datang;
-    stateObj.pulang = null;
-    stateObj._tanggalTugas = datang.tanggalTugas || tglHari;
-
-    // ✅ Cek lintas hari untuk dinas malam
-    const detailSekarang = stateObj.detail;
-
-    if (this.DINAS_LINTAS_HARI.indexOf(detailSekarang) !== -1) {
-      const tglDatang = String(datang.timestampClient || '').slice(0, 10);
-
-      if (tglDatang && tglDatang !== tglHari) {
-        const selisih = Math.round(
-          (new Date(tglHari) - new Date(tglDatang)) /
-          (24 * 60 * 60 * 1000)
-        );
-
-        if (selisih >= 0 && selisih <= 1) {
-          stateObj._lintasHariDinasMalam = true;
-          stateObj._tanggalTugas = tglDatang;
-
-        } else if (selisih > 1) {
-          // Lebih dari 1 hari, anggap SELESAI
-          stateObj.status = "SELESAI";
-          stateObj.expired = true;
-
-          stateObj.pulang = Object.assign({}, datang, {
-            statusAbsen: "Pulang",
-            timestampClient: tglDatang + "T23:59:59+08:00",
-            autoClose: true
-          });
-        }
+      if (!sync) {
+        return this.buildAttendanceState(null, lokal);
       }
-    }
 
-  // ============================================================
-  // TIDAK ADA AKTIVITAS VALID HARI INI
-  // ============================================================
+      const datang = sync.datang ? this.dataServerKeDataLokal(sync.datang) : null;
+      const pulang = sync.pulang ? this.dataServerKeDataLokal(sync.pulang) : null;
+      const keterangan = Array.isArray(sync.keterangan) ? sync.keterangan : [];
+      // Catatan pulang dapat berasal dari dinas sebelumnya. Jika server juga
+      // mengirim absen datang yang lebih baru, tampilkan status datang agar
+      // dinas malam yang baru dimulai tidak keliru dianggap sudah pulang.
+      const waktuDatang = datang ? new Date(datang.timestampClient).getTime() : 0;
+      const waktuPulang = pulang ? new Date(pulang.timestampClient).getTime() : 0;
+      const datangLebihBaru = waktuDatang && (!waktuPulang || waktuDatang > waktuPulang);
 
-  } else {
-    // Sengaja tidak mengambil "lokal" di sini.
-    // Jika aktivitas terakhir adalah kemarin, status hari ini
-    // harus tetap BELUM_ABSEN.
-    stateObj.status = "BELUM_ABSEN";
-    stateObj.detail = "";
-    stateObj.datang = null;
-    stateObj.pulang = null;
-    stateObj._tanggalTugas = tglHari;
-  }
+      if (pulang && !datangLebihBaru) {
+        stateObj.status = "SELESAI";
+        stateObj.detail = pulang.detailAbsen || (datang && datang.detailAbsen) || sync.detail || "";
+        stateObj.datang = datang || (lokal && lokal.datang) || null;
+        stateObj.pulang = pulang;
+      } else if (datang) {
+        stateObj.status = "SUDAH_DATANG";
+        stateObj.detail = datang.detailAbsen || sync.detail || "";
+        stateObj.datang = datang;
+        stateObj.pulang = null;
+      } else if (keterangan.length) {
+        const k = keterangan[0];
+        stateObj.status = "KETERANGAN";
+        stateObj.detail = k.detailAbsen || k.keterangan || "";
+        stateObj.datang = this.dataServerKeDataLokal(k);
+      } else if (lokal && lokal.status && lokal.status !== "BELUM_ABSEN") {
+        return this.buildAttendanceState(null, lokal);
+      }
 
-  this.cekAbsenKadaluarsa(stateObj);
-  this.cekKeteranganWaktuTiba(stateObj);
-  STORAGE.simpanAbsensiHariIni(stateObj);
-
-  return stateObj;
-},
+      this.cekAbsenKadaluarsa(stateObj);
+      this.cekKeteranganWaktuTiba(stateObj);
+      STORAGE.simpanAbsensiHariIni(stateObj);
+      return stateObj;
+    },
 
     buildAttendanceState(row, lokal) {
       const stateObj = {
@@ -1708,15 +1624,13 @@
         detail: "",
         datang: null,
         pulang: null,
-        expired: false,
-        _tanggalTugas: null,
-        _lintasHariDinasMalam: false
+        expired: false
       };
       const soalTanggal = row && (row.tanggal || row.tanggalTugas || row.timestampClient || row.timestampServer || '');
       const isServerHariIni = row && this.isTanggalHariIni(soalTanggal);
       const rawStatus = String(row?.statusAbsen || row?.status || '').trim().toLowerCase();
       const detailServer = String(row?.detailAbsen || row?.detail || '').trim();
-      const isServerLintasHari = rawStatus === 'datang' && this.DINAS_LINTAS_HARI.indexOf(detailServer) !== -1;
+      const isServerLintasHari = rawStatus === 'datang' && ['Dinas Malam','Dinas Sore + Malam','Dinas Malam + Pagi'].includes(detailServer);
 
       if (isServerHariIni || isServerLintasHari) {
         const s = rawStatus.toLowerCase();
@@ -1728,89 +1642,41 @@
           stateObj.status = "SELESAI";
           stateObj.detail = det;
           stateObj.pulang = this.dataServerKeDataLokal(row);
-          stateObj._tanggalTugas = (lokal && lokal.datang && lokal.datang.tanggalTugas) || row.tanggalTugas || (lokal && lokal._tanggalTugas) || STORAGE.todayKey();
           if (lokal && lokal.datang) stateObj.datang = lokal.datang;
         } else if (s === 'datang') {
           stateObj.status = "SUDAH_DATANG";
           stateObj.detail = det;
           stateObj.datang = this.dataServerKeDataLokal(row);
-          stateObj._tanggalTugas = row.tanggalTugas || STORAGE.todayKey();
-          
-          if (this.DINAS_LINTAS_HARI.indexOf(det) !== -1) {
-            const tglDatang = String(row.timestampClient || row.tanggal || '').slice(0, 10);
-            const tglHari = STORAGE.todayKey();
-            if (tglDatang && tglDatang !== tglHari) {
-              const selisih = Math.round((new Date(tglHari) - new Date(tglDatang)) / (24*60*60*1000));
-              if (selisih >= 0 && selisih <= 1) {
-                stateObj._lintasHariDinasMalam = true;
-                stateObj._tanggalTugas = tglDatang;
-              } else if (selisih > 1) {
-                stateObj.status = "SELESAI";
-                stateObj.expired = true;
-                stateObj.pulang = Object.assign({}, stateObj.datang, {
-                  statusAbsen: 'Pulang',
-                  timestampClient: tglDatang + 'T23:59:59+08:00',
-                  autoClose: true
-                });
-              }
-            }
-          }
         } else if (statusIsKeterangan) {
           stateObj.status = "KETERANGAN";
           stateObj.detail = det || rawStatus;
           stateObj.datang = this.dataServerKeDataLokal(row);
-          stateObj._tanggalTugas = row.tanggalTugas || STORAGE.todayKey();
         }
       } 
       else if (lokal && lokal.status && lokal.status !== "BELUM_ABSEN" && lokal.datang && lokal.datang.timestampClient) {
         const tglDatangLokal = String(lokal.datang.timestampClient).slice(0,10);
         const tglHariIni = STORAGE.todayKey();
         const detailLokal = lokal.detail || lokal.datang.detailAbsen || '';
-        const isLintasHari = this.DINAS_LINTAS_HARI.indexOf(detailLokal) !== -1;
+        const isLintasHari = ['Dinas Malam', 'Dinas Sore + Malam', 'Dinas Malam + Pagi'].indexOf(detailLokal) !== -1;
+        const isDataLokaltodayOrLintasHari = (tglDatangLokal === tglHariIni) || (isLintasHari && tglDatangLokal < tglHariIni);
         
-        const d1 = new Date(tglDatangLokal + 'T00:00:00');
-        const d2 = new Date(tglHariIni + 'T00:00:00');
-        const selisihHari = Math.round((d2 - d1) / (24*60*60*1000));
-        
-        let dataRelevan = false;
-        if (isLintasHari) {
-          dataRelevan = selisihHari >= 0 && selisihHari <= 1;
-        } else {
-          dataRelevan = selisihHari === 0;
-        }
-        
-        if (dataRelevan) {
+        if (isDataLokaltodayOrLintasHari) {
           const localRawStatus = String(lokal.status || '').trim();
           const localStatus = localRawStatus.toLowerCase();
           const localIsKeterangan = localStatus === 'keterangan' || CONFIG.JADWAL_DINAS.Keterangan.map(function(j){ return j.nama.toLowerCase(); }).indexOf(localStatus) !== -1;
-          
           if (localStatus === 'pulang' || localStatus === 'selesai') {
             stateObj.status = "SELESAI";
           } else if (localStatus === 'sudah_datang' || localStatus === 'datang') {
             stateObj.status = "SUDAH_DATANG";
           } else if (localStatus === 'tidak_absen_pulang' || localIsKeterangan) {
-            if (isLintasHari && selisihHari > 0 && localIsKeterangan && 
-                ['Dinas Sore', 'Dinas Malam'].indexOf(detailLokal) !== -1) {
-              stateObj.status = "BELUM_ABSEN";
-              stateObj.detail = "";
-              stateObj.datang = null;
-              stateObj.pulang = null;
-              stateObj.expired = false;
-              dataRelevan = false;
-            } else {
-              stateObj.status = localIsKeterangan ? "KETERANGAN" : "TIDAK_ABSEN_PULANG";
-            }
+            stateObj.status = localIsKeterangan ? "KETERANGAN" : "TIDAK_ABSEN_PULANG";
           } else {
             stateObj.status = lokal.status;
           }
-          
-          if (dataRelevan) {
-            stateObj.detail = lokal.detail || localRawStatus || '';
-            stateObj.datang = lokal.datang;
-            stateObj.pulang = lokal.pulang;
-            stateObj.expired = !!lokal.expired;
-            if (lokal._tanggalTugas) stateObj._tanggalTugas = lokal._tanggalTugas;
-          }
+          stateObj.detail = lokal.detail || localRawStatus || '';
+          stateObj.datang = lokal.datang;
+          stateObj.pulang = lokal.pulang;
+          stateObj.expired = !!lokal.expired;
         }
       }
 
@@ -1821,107 +1687,59 @@
     },
 
     cekAbsenKadaluarsa(stateObj) {
-      if (!stateObj) return;
-      
-      const tglDatang = stateObj.datang && stateObj.datang.timestampClient
-        ? String(stateObj.datang.timestampClient).slice(0,10)
-        : (stateObj._tanggalTugas || STORAGE.todayKey());
-      
-      const tglSekarang = STORAGE.todayKey();
-      const detail = stateObj.detail || (stateObj.datang && stateObj.datang.detailAbsen) || '';
-      
-      const isLintasHari = this.DINAS_LINTAS_HARI.indexOf(detail) !== -1;
-      
-      const d1 = new Date(tglDatang + 'T00:00:00');
-      const d2 = new Date(tglSekarang + 'T00:00:00');
-      const selisihHari = Math.round((d2 - d1) / (24*60*60*1000));
-      
-      // ATURAN 1: Lintas hari > 1 hari → SELESAI
-      if (isLintasHari && selisihHari > 1) {
-        stateObj.status = "SELESAI";
-        stateObj.expired = true;
-        stateObj.detail = detail;
-        stateObj._lintasHariDinasMalam = false;
-        STORAGE.simpanAbsensiHariIni(stateObj);
-        return;
-      }
-      
-      // ATURAN 2: Bukan lintas hari tapi ganti hari → SELESAI (auto-close)
-      if (!isLintasHari && selisihHari > 0) {
-        stateObj.status = "SELESAI";
-        stateObj.expired = true;
-        if (stateObj.pulang === null && stateObj.datang) {
-          stateObj.pulang = Object.assign({}, stateObj.datang, {
-            statusAbsen: 'Pulang',
-            timestampClient: tglDatang + 'T23:59:59+08:00',
-            keterangan: '[Auto-close] Lupa absen pulang',
-            autoClose: true
-          });
-        }
-        stateObj._lintasHariDinasMalam = false;
-        STORAGE.simpanAbsensiHariIni(stateObj);
-        return;
-      }
-      
-      // ATURAN 3: Masih hari yang sama, cek jam batas
       if (stateObj.status !== "SUDAH_DATANG" || !stateObj.datang) return;
-      
+      const detail = stateObj.detail || stateObj.datang.detailAbsen || '';
       const jadwal = CONFIG.JADWAL_DINAS.Datang.find(j => j.nama === detail);
       if (!jadwal || !jadwal.batasPulang) return;
-      
       const sekarang = new Date();
       const jamSekarangMenit = (sekarang.getHours() * 60) + sekarang.getMinutes();
       const batasMenit = this.jamKeMenit(jadwal.batasPulang);
-      
-      if (jamSekarangMenit > batasMenit) {
-        stateObj.status = "TIDAK_ABSEN_PULANG";
-        stateObj.expired = true;
-        STORAGE.simpanAbsensiHariIni(stateObj);
+      const tglDatangStr = stateObj.datang.timestampClient ? String(stateObj.datang.timestampClient).slice(0,10) : STORAGE.todayKey();
+      const tglSekarangStr = STORAGE.todayKey();
+      const isLintasHari = ['Dinas Malam', 'Dinas Sore + Malam', 'Dinas Malam + Pagi'].indexOf(detail) !== -1;
+      if (isLintasHari) {
+        if (tglSekarangStr === tglDatangStr) return;
+        const selisihHari = (new Date(tglSekarangStr) - new Date(tglDatangStr)) / (24*60*60*1000);
+        if (selisihHari > 1 || jamSekarangMenit > batasMenit) {
+          stateObj.status = "TIDAK_ABSEN_PULANG";
+          stateObj.expired = true;
+        }
+      } else {
+        if (tglSekarangStr !== tglDatangStr || jamSekarangMenit > batasMenit) {
+          stateObj.status = "TIDAK_ABSEN_PULANG";
+          stateObj.expired = true;
+        }
       }
     },
 
     cekKeteranganWaktuTiba(stateObj) {
-      if (!stateObj || stateObj.status !== "KETERANGAN") return;
+      if (stateObj.status !== "KETERANGAN") return;
       const detail = stateObj.detail || '';
       const sekarang = new Date();
       const jamSekarangMenit = (sekarang.getHours() * 60) + sekarang.getMinutes();
       
-      const tglKeterangan = stateObj.datang && stateObj.datang.timestampClient
-        ? String(stateObj.datang.timestampClient).slice(0,10)
-        : STORAGE.todayKey();
-      const tglSekarang = STORAGE.todayKey();
-      const lintasHari = tglKeterangan !== tglSekarang;
-      
+      // FIX: Dinas Sore hilang jam 13:45
       if (detail === 'Dinas Sore') {
         const batasSore = 13 * 60 + 45;
-        if (jamSekarangMenit >= batasSore || lintasHari) {
-          this.resetStateKeBelumAbsen(stateObj);
+        if (jamSekarangMenit >= batasSore) {
+          stateObj.status = "BELUM_ABSEN";
+          stateObj.detail = "";
+          stateObj.datang = null;
+          stateObj.pulang = null;
+          stateObj.expired = false;
         }
       }
+      // FIX: Dinas Malam hilang jam 19:45
       else if (detail === 'Dinas Malam') {
         const batasMalam = 19 * 60 + 45;
-        if (jamSekarangMenit >= batasMalam || lintasHari) {
-          if (lintasHari) {
-            // Dinas malam lintas hari: tetap dianggap SUDAH_DATANG
-            stateObj.status = "SUDAH_DATANG";
-            stateObj._lintasHariDinasMalam = true;
-            STORAGE.simpanAbsensiHariIni(stateObj);
-          } else {
-            this.resetStateKeBelumAbsen(stateObj);
-          }
+        if (jamSekarangMenit >= batasMalam) {
+          stateObj.status = "BELUM_ABSEN";
+          stateObj.detail = "";
+          stateObj.datang = null;
+          stateObj.pulang = null;
+          stateObj.expired = false;
         }
       }
-    },
-    
-    resetStateKeBelumAbsen(stateObj) {
-      stateObj.status = "BELUM_ABSEN";
-      stateObj.detail = "";
-      stateObj.datang = null;
-      stateObj.pulang = null;
-      stateObj.expired = false;
-      stateObj._tanggalTugas = null;
-      stateObj._lintasHariDinasMalam = false;
-      STORAGE.simpanAbsensiHariIni(stateObj);
     }
   };
 
@@ -1977,6 +1795,7 @@
       await DOM.video.play(); 
       console.log("Kamera aktif, mulai deteksi wajah");
       
+      // FIX #15: Cleanup interval lama, buat baru
       if (deteksiWajahInterval) clearInterval(deteksiWajahInterval);
       deteksiWajahInterval = setInterval(async function(){
         if (!modelWajahSiap) return;
@@ -1990,6 +1809,7 @@
       }, 500);
     },
     tutupKamera() { 
+      // FIX #15: Stop face detection interval
       if (deteksiWajahInterval) { 
         clearInterval(deteksiWajahInterval); 
         deteksiWajahInterval = null; 
@@ -2006,9 +1826,9 @@
       const out = Math.min(CONFIG.FOTO_MAX_WIDTH, 280);
       const crop = Math.round(Math.min(vw, vh) * 0.88);
       const cx = Math.max(0, Math.round((vw - crop) / 2));
-      const cy = Math.round((vh - crop) / 2);
-      const cy0 = Math.max(0, cy - Math.round(crop * 0.06));
-      const cyf = Math.min(cy0, Math.max(0, vh-crop));
+      const cy0 = Math.round((vh - crop) / 2);
+      const cy = Math.max(0, cy0 - Math.round(crop * 0.06));
+      const cyf = Math.min(cy, Math.max(0, vh-crop));
       DOM.canvas.width = out; DOM.canvas.height = out;
       const ctx = DOM.canvas.getContext('2d');
       ctx.filter = "brightness(1.05) contrast(1.08)";
@@ -2060,24 +1880,18 @@
       if (/^-?\d+\.\d+$/.test(s)) s = s.replace('.', ',');
       return s;
     },
-
     setStatus(p, t) {
-  const box = DOM.adminPage && !DOM.adminPage.classList.contains('hidden') && DOM.adminStatus
-    ? DOM.adminStatus
-    : DOM.statusBox;
-  if (!box) return;
-  clearTimeout(this.statusAutoHideTimer);
-  box.className = 'status ' + (t||'');
-  box.innerHTML = '<button type="button" class="status-close" data-action="close-status" title="Tutup">×</button>' + UTIL.escapeHTML(p);
-  box.classList.remove('hidden');
-  const rt = DOM.rekapArea && !DOM.rekapArea.classList.contains('hidden');
-  if (!rt) this.statusAutoHideTimer = setTimeout(()=>this.clearStatus(), 10000);
-},
-    clearStatus() {
-  if (DOM.statusBox) DOM.statusBox.classList.add('hidden');
-  if (DOM.adminStatus) DOM.adminStatus.classList.add('hidden');
-},
+      if (!DOM.statusBox) return;
+      clearTimeout(this.statusAutoHideTimer);
+      DOM.statusBox.className = 'status ' + (t||'');
+      DOM.statusBox.innerHTML = '<button type="button" class="status-close" data-action="close-status" title="Tutup">×</button>' + UTIL.escapeHTML(p);
+      DOM.statusBox.classList.remove('hidden');
+      const rt = DOM.rekapArea && !DOM.rekapArea.classList.contains('hidden');
+      if (!rt) this.statusAutoHideTimer = setTimeout(()=>this.clearStatus(), 10000);
+    },
+    clearStatus() { if (DOM.statusBox) DOM.statusBox.classList.add('hidden'); },
     
+    // FIX #16: navigator.onLine check yang benar
     updateNetworkStatus() {
       const o = navigator.onLine === true;
       if (DOM.networkBadgeInline) { 
@@ -2109,10 +1923,9 @@
         
         if (STATE.pegawaiAktif) {
           const stateLama = STATE.absensiHariIni.status;
-          const detailLama = STATE.absensiHariIni.detail;
           ENGINE.cekAbsenKadaluarsa(STATE.absensiHariIni);
           ENGINE.cekKeteranganWaktuTiba(STATE.absensiHariIni);
-          if (stateLama !== STATE.absensiHariIni.status || detailLama !== STATE.absensiHariIni.detail) {
+          if (stateLama !== STATE.absensiHariIni.status) {
             this.renderStatusHariIni();
           }
         }
@@ -2151,8 +1964,7 @@
       if (statusHariIni === 'BELUM_ABSEN') {
         statusText = '🔴 Belum Absen';
       } else if (statusHariIni === 'SUDAH_DATANG') {
-        const lintas = STATE.absensiHariIni._lintasHariDinasMalam ? ' (lintas hari)' : '';
-        statusText = `🟡 Dinas ${detail}${lintas}`;
+        statusText = `🟡 Dinas ${detail}`;
       } else if (statusHariIni === 'SELESAI') {
         statusText = `🟢 Absensi Selesai ${detail}`;
       } else if (statusHariIni === 'KETERANGAN') {
@@ -2209,6 +2021,7 @@
       const l = DOM.detailAbsen.value;
       const pil = ENGINE.pilihanDetail(STATE.menuAbsenAktif);
       if (!pil || !pil.length) {
+        // FIX #19: Kosongkan dropdown jika tidak ada pilihan
         DOM.detailAbsen.innerHTML = '<option value="">-- Tidak ada pilihan --</option>';
         DOM.detailAbsen.value = '';
         return;
@@ -2233,40 +2046,9 @@
       this.hide(DOM.infoSelesaiAbsen);
       this.show(DOM.noteFormAbsensi);
 
-      const stateObj = STATE.absensiHariIni;
-      const stateHariIni = stateObj.status;
+      const stateHariIni = STATE.absensiHariIni.status;
 
-      // ✅ CEK LINTAS HARI sebelum render
-      ENGINE.cekAbsenKadaluarsa(stateObj);
-      ENGINE.cekKeteranganWaktuTiba(stateObj);
-      
-      const statusFinal = stateObj.status;
-      
-      // ✅ Jika sudah lintas hari + status BUKAN lintas hari yg valid → reset
-      if (stateObj.datang && stateObj.datang.timestampClient) {
-        const tglDatang = String(stateObj.datang.timestampClient).slice(0,10);
-        const tglHariIni = STORAGE.todayKey();
-        const detailFinal = stateObj.detail || stateObj.datang.detailAbsen || '';
-        const isDinasLintasHari = ENGINE.DINAS_LINTAS_HARI.indexOf(detailFinal) !== -1;
-        
-        if (tglDatang !== tglHariIni && !isDinasLintasHari) {
-          if (statusFinal === 'SUDAH_DATANG') {
-            stateObj.status = 'SELESAI';
-            stateObj.expired = true;
-            if (!stateObj.pulang) {
-              stateObj.pulang = Object.assign({}, stateObj.datang, {
-                statusAbsen: 'Pulang',
-                timestampClient: tglDatang + 'T23:59:59+08:00',
-                autoClose: true
-              });
-            }
-            STORAGE.simpanAbsensiHariIni(stateObj);
-            return this.renderStatusHariIni(); // Re-render
-          }
-        }
-      }
-
-      if (statusFinal === 'BELUM_ABSEN') {
+      if (stateHariIni === 'BELUM_ABSEN') {
         this.show(DOM.containerDetailAbsen);
         this.show(DOM.detailAbsen);
         this.show(DOM.containerKeterangan);
@@ -2279,36 +2061,25 @@
         return;
       }
 
-      if (statusFinal === 'SUDAH_DATANG') {
-        const datangData = stateObj.datang;
-        this.tampilkanRingkasanDatang(datangData, stateObj._lintasHariDinasMalam);
+      if (stateHariIni === 'SUDAH_DATANG') {
+        const datangData = STATE.absensiHariIni.datang;
+        this.tampilkanRingkasanDatang(datangData);
         STATE.menuAbsenAktif = 'Pulang';
         this.updateModeAbsensi();
         this.renderHeaderInfo();
         return;
       }
 
-      if (statusFinal === 'SELESAI' || statusFinal === 'KETERANGAN' || statusFinal === 'TIDAK_ABSEN_PULANG') {
+      if (stateHariIni === 'SELESAI' || stateHariIni === 'KETERANGAN' || stateHariIni === 'TIDAK_ABSEN_PULANG') {
         this.tampilkanSelesaiAbsenHariIni();
         this.renderHeaderInfo();
         return;
       }
     },
     
-    tampilkanRingkasanDatang(d, isLintasHari) {
+    tampilkanRingkasanDatang(d) {
       if (!d) return;
-      
-      const tglDatang = d.timestampClient ? String(d.timestampClient).slice(0,10) : STORAGE.todayKey();
-      const tglHariIni = STORAGE.todayKey();
-      const lintasHari = tglDatang !== tglHariIni;
-      
-      let judulTambahan = '';
-      if (lintasHari && isLintasHari) {
-        const tglDatangIndo = UTIL.tanggalIndonesia(new Date(tglDatang + 'T00:00:00'));
-        judulTambahan = ' (mulai ' + tglDatangIndo + ')';
-      }
-      
-      if (DOM.summaryDatangTitle) DOM.summaryDatangTitle.textContent = (d.detailAbsen || d.detail || 'Dinas') + judulTambahan;
+      if (DOM.summaryDatangTitle) DOM.summaryDatangTitle.textContent = d.detailAbsen || d.detail || 'Dinas';
       if (DOM.summaryDatangText) DOM.summaryDatangText.textContent = ENGINE.teksRingkasanDatang(d);
 
       if (DOM.summaryThumbContainer && DOM.summaryThumb) {
@@ -2355,8 +2126,7 @@
         const p = stateObj.pulang || {};
         const fotoDatang = d.linkFoto || d.fotoBase64 || '';
         const fotoPulang = p.linkFoto || p.fotoBase64 || '';
-        const tglTugas = stateObj._tanggalTugas || (d.timestampClient ? String(d.timestampClient).slice(0,10) : null);
-        const tanggalTugas = tglTugas ? UTIL.tanggalIndonesia(new Date(tglTugas + 'T00:00:00')) : '-';
+        const tanggalTugas = d.timestampClient ? UTIL.tanggalIndonesia(new Date(d.timestampClient)) : '-';
         const detail = stateObj.detail || d.detailAbsen || p.detailAbsen || d.detail || p.detail || '';
         const waktuDatang = d.timestampClient ? new Date(d.timestampClient) : null;
         const waktuPulang = p.timestampClient ? new Date(p.timestampClient) : null;
@@ -2366,6 +2136,8 @@
         const lokasiPulang = ENGINE.statusLokasi(p.latitude, p.longitude);
         const durasi = (waktuDatang && waktuPulang) ? ENGINE.formatDurasiKerja(waktuPulang - waktuDatang) : '-';
 
+        // renderThumbnailFoto() sudah melakukan validasi/escape URL.
+        // Jangan escape hasil HTML thumbnail sekali lagi, karena akan tampil sebagai kode teks.
         const escFotoDatang = UI.renderThumbnailFoto(fotoDatang);
         const escFotoPulang = UI.renderThumbnailFoto(fotoPulang);
 
@@ -2444,7 +2216,7 @@
         if (btnTambah) {
           btnTambah.onclick = () => {
             STATE.dariTambahDinas = true;
-            STATE.absensiHariIni = { status: 'BELUM_ABSEN', detail: '', datang: null, pulang: null, expired: false, _tanggalTugas: null, _lintasHariDinasMalam: false };
+            STATE.absensiHariIni = { status: 'BELUM_ABSEN', detail: '', datang: null, pulang: null, expired: false };
             ENGINE.setMode('Datang');
             UI.hide(DOM.infoSelesaiAbsen);
             UI.tampilkanFormAbsensi();
@@ -2456,22 +2228,25 @@
       }
     },
     
-    renderThumbnailFoto(foto) {
-      if (!foto) return '';
-      let url = String(foto).trim();
-      if (!/^https?:\/\//i.test(url)) return '';
-      
-      if (url.includes('drive.google.com')) {
-        const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        if (idMatch) {
-          url = 'https://drive.google.com/thumbnail?id=' + idMatch[1] + '&sz=w1000';
-        }
-      }
-      
-      const safeUrl = UTIL.escapeHTML(url);
-      return '<div class="thumbnail-absen"><img src="' + safeUrl + '" class="foto-thumbnail" data-foto-url="' + safeUrl + '" alt="Foto Absen"></div>';
-    },
+// CARI fungsi renderThumbnailFoto (sekitar baris 1700-an)
+renderThumbnailFoto(foto) {
+  if (!foto) return '';
+  let url = String(foto).trim();
+  if (!/^https?:\/\//i.test(url)) return '';
+  
+  if (url.includes('drive.google.com')) {
+    // TAMBAHKAN INI: handle format uc?export=view&id=XXX
+    const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (idMatch) {
+      url = 'https://drive.google.com/thumbnail?id=' + idMatch[1] + '&sz=w1000';
+    }
+  }
+  
+  const safeUrl = UTIL.escapeHTML(url);
+  return '<div class="thumbnail-absen"><img src="' + safeUrl + '" class="foto-thumbnail" data-foto-url="' + safeUrl + '" alt="Foto Absen"></div>';
+},
 
+    
     previewFoto(url) {
       if (!url) return;
       if (!/^https?:\/\//i.test(url)) return;
@@ -2574,6 +2349,7 @@
         return '<div class="dashboard-metric"><div class="nilai">'+UTIL.escapeHTML(x.nilai==null?'0':String(x.nilai))+'</div><div class="nama">'+UTIL.escapeHTML(x.label||'')+'</div></div>'; 
       }).join('');
       
+      // Bar chart untuk jenis dinas
       let chartHtml = '';
       if (chartData.jenisDinas) {
         const jd = chartData.jenisDinas;
@@ -2587,6 +2363,7 @@
         chartHtml += '</div>';
       }
       
+      // Bar chart untuk non-absensi
       if (chartData.nonAbsensi) {
         const na = chartData.nonAbsensi;
         const entries = Object.keys(na);
@@ -2610,7 +2387,7 @@
       const x = d || { total:[],hadir:[],dinas:[],libur:[],belum:[] };
       if (DOM.adminTotal) DOM.adminTotal.textContent = x.total.length;
       if (DOM.adminHadir) DOM.adminHadir.textContent = x.hadir.length;
-      if (DOM.adminLibur) DOM.adminLibur.textContent = x.libur.length;
+      if (DOM.adminLibur) DOM.adminLibur.textContent = x.libur.length;  // FIX #14
       if (DOM.adminBelum) DOM.adminBelum.textContent = x.belum.length;
     },
     
@@ -2681,7 +2458,7 @@
           const pulang = aj(it, ['pulang','jamPulang','jamKeluar','waktuPulang']) || '-';
           return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #e2e8f0">'
             + '<span style="flex:1"><b>' + (i+1) + '. ' + UTIL.escapeHTML(nama) + '</b><br><small>' + UTIL.escapeHTML(detail) + ' • ' + datang + ' - ' + pulang + '</small></span>'
-            + '<button type="button" class="btn-secondary btn-icon-detail" data-action="open-admin-absensi-detail" data-admin-hadir-index="' + i + '" aria-label="Lihat detail" title="Lihat detail">�</button></div>';
+            + '<button type="button" class="btn-secondary btn-icon-detail" data-action="open-admin-absensi-detail" data-admin-hadir-index="' + i + '" aria-label="Lihat detail" title="Lihat detail">👁</button></div>';
         }).join('') : 'Tidak ada data.';
         DOM.adminDetail.innerHTML = '<div class="admin-mini-title">Dinas</div>' + rows;
         DOM.adminDetail.classList.remove('hidden');
@@ -2751,123 +2528,6 @@
     lihatAdminDetail(j, t) { document.querySelectorAll('[data-admin-chip]').forEach(function(e){e.classList.toggle('active', e===t);}); UI.renderAdminDetail(j); }
   };
 
-  /* ============================================================
-     SISTEM PENGINGAT ABSEN PULANG (RINGAN)
-  ============================================================ */
-  const AbsenReminder = (() => {
-    const CONFIG_REMINDER = {
-      cekSetiapDetik: 60,
-      menitSebelumPulang: 30,
-      menitJadiCritical: 15,
-      maxTampilPerHari: 8,
-      cooldownMenit: 5
-    };
-    
-    let intervalId = null;
-    let counterHarian = 0;
-    let terakhirTampil = 0;
-    
-    function cek() {
-      if (!STATE.pegawaiAktif) return hide();
-      if (STATE.absensiHariIni.status !== 'SUDAH_DATANG') return hide();
-      
-      const detail = STATE.absensiHariIni.detail || 'Dinas Pagi';
-      const jamPulang = ENGINE.jamPulangNormal(detail);
-      const menitPulang = ENGINE.jamKeMenit(jamPulang);
-      const menitSkrg = ENGINE.menitSekarang();
-      const selisih = menitSkrg - menitPulang;
-      
-      if (selisih < -CONFIG_REMINDER.menitSebelumPulang) return hide();
-      if (counterHarian >= CONFIG_REMINDER.maxTampilPerHari) return hide();
-      
-      const now = Date.now();
-      if (now - terakhirTampil < CONFIG_REMINDER.cooldownMenit * 60 * 1000) return;
-      
-      let critical = selisih >= CONFIG_REMINDER.menitJadiCritical;
-      let judul, pesan;
-      
-      if (selisih < 0) {
-        const sisa = -selisih;
-        judul = '⏰ Pulang dalam ' + sisa + ' menit';
-        pesan = 'Jangan lupa absen pulang ' + detail + ' pukul ' + jamPulang;
-      } else if (selisih < 15) {
-        judul = '⏰ Saatnya Absen Pulang';
-        pesan = detail + ' • Batas pulang ' + jamPulang;
-      } else {
-        judul = '🚨 Anda belum absen pulang!';
-        pesan = 'Terlambat ' + selisih + ' menit dari batas (' + jamPulang + ')';
-      }
-      
-      tampilkan(critical, judul, pesan);
-      terakhirTampil = now;
-      counterHarian++;
-      
-      if (critical && navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    }
-    
-    function tampilkan(critical, judul, pesan) {
-      const host = document.getElementById('absenReminderHost');
-      if (!host) return;
-      
-      host.innerHTML = `
-        <div class="absen-reminder ${critical ? 'critical' : ''}" role="alert">
-          <div class="absen-reminder-icon">${critical ? '🚨' : '⏰'}</div>
-          <div class="absen-reminder-text">
-            <strong>${UTIL.escapeHTML(judul)}</strong>
-            <small>${UTIL.escapeHTML(pesan)}</small>
-          </div>
-          <button class="absen-reminder-btn" data-action="reminder-absen">Absen</button>
-          <button class="absen-reminder-close" data-action="reminder-tutup" aria-label="Tutup">✕</button>
-        </div>
-      `;
-      
-      if (critical !== true) {
-        setTimeout(() => {
-          const el = host.querySelector('.absen-reminder');
-          if (el) el.remove();
-        }, 5 * 60 * 1000);
-      }
-      
-      const btnDismiss = host.querySelector('[data-action="reminder-tutup"]');
-      if (btnDismiss) btnDismiss.onclick = hide;
-      
-      const btnGoAbsen = host.querySelector('[data-action="reminder-absen"]');
-      if (btnGoAbsen) btnGoAbsen.onclick = () => {
-        hide();
-        APP.prosesAwalAbsensi();
-      };
-    }
-    
-    function hide() {
-      const host = document.getElementById('absenReminderHost');
-      if (host) host.innerHTML = '';
-    }
-    
-    function mulai() {
-      if (intervalId) return;
-      const resetCounter = () => { counterHarian = 0; };
-      const now = new Date();
-      const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1, 0, 0, 5) - now;
-      setTimeout(() => { resetCounter(); setInterval(resetCounter, 24*60*60*1000); }, msUntilMidnight);
-      
-      cek();
-      intervalId = setInterval(cek, CONFIG_REMINDER.cekSetiapDetik * 1000);
-      console.log('🔔 Reminder absen pulang aktif');
-    }
-    
-    function stop() {
-      if (intervalId) { clearInterval(intervalId); intervalId = null; }
-      hide();
-      counterHarian = 0;
-    }
-    
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) cek();
-    });
-    
-    return { mulai, stop, cek, hide };
-  })();
-
   const APP = {
     async mulai() {
       initDOM();
@@ -2882,22 +2542,26 @@
         const lokal = STORAGE.ambilAbsensiAktif();
         STATE.absensiHariIni = ENGINE.buildAttendanceState(null, lokal);
         UI.tampilkanFormAbsensi();
-        this.cekRiwayatTerakhirBackground();
+        this.cekRiwayatTerakhir(false); 
         this.muatAdminDariCache();
       } else {
         UI.tampilkanRegistrasi();
       }
       this.bindEvents();
 
+      // Buka IndexedDB di background. Tidak memblokir tampilan aplikasi.
       STORAGE.bukaIndexedDB().catch(function() {});
+      
+      // FIX: Load model wajah di background, tidak menghambat UI
       muatModelWajah();
       
-      // ✅ Aktifkan reminder
-      AbsenReminder.mulai();
+      // Tutup splash screen dengan animasi fade setelah aplikasi siap dirender.
+      setTimeout(function() { SPLASH.hide(); }, 6000);
     },
 
     bindEvents() {
       document.addEventListener('click', (e) => {
+        // FIX #17: Handle click pada foto thumbnail
         const fotoTarget = e.target.closest('[data-foto-url]');
         if (fotoTarget) {
           e.preventDefault();
@@ -2956,8 +2620,11 @@
       });
       if (DOM.keterangan) DOM.keterangan.addEventListener('input', () => UI.updateTombolMulaiAbsen());
       if (DOM.adminTanggalFilter) {
-        DOM.adminTanggalFilter.addEventListener('change', () => this.setTanggalAdmin(DOM.adminTanggalFilter.value));
-      }
+  DOM.adminTanggalFilter.addEventListener(
+    'change',
+    () => this.setTanggalAdmin(DOM.adminTanggalFilter.value)
+  );
+}
       ['rekapBulan','rekapTahun'].forEach((id) => { if (DOM[id]) DOM[id].addEventListener('change', () => {
         if (STATE.rekapBulanan && STATE.rekapBulanan.rows && STATE.rekapBulanan.rows.length) {
           UI.renderRekapBulanan({ rows: [] });
@@ -2981,10 +2648,7 @@
       const id = String(DOM.inputIdPegawai && DOM.inputIdPegawai.value || '').trim();
       const err = UTIL.validasiIdPegawai(id);
       if (err) { UI.setRegisterMessage(err, 'error'); return; }
-      
-      BTN_LOADING.setByAction('check-employee', true);
       UI.setRegisterMessage('Memeriksa ID Pegawai...', 'warning');
-      
       try {
         const res = await API.cekPegawai(id);
         if (CONFIG.MODE_UJI_COBA && id === CONFIG.TESTER_ID) {
@@ -3020,34 +2684,6 @@
         }
       } catch (err) {
         UI.setRegisterMessage('Gagal menghubungi server. Periksa koneksi internet.', 'error');
-      } finally {
-        BTN_LOADING.setByAction('check-employee', false);
-      }
-    },
-
-    async cekRiwayatTerakhirBackground() {
-      const id = this.getIdPegawaiAktif();
-      if (!id) return;
-      try {
-        const res = await API.cekRiwayatTerakhir(id);
-        const row = res && res.terakhir ? res.terakhir : null;
-        STATE.terakhirServer = row;
-        if (!STATE.baruSajaKirim) {
-          const lokalRefresh = STORAGE.ambilAbsensiHariIni();
-          STATE.absensiHariIni = (res && res.sinkron)
-            ? ENGINE.buildAttendanceStateFromSync(res.sinkron, lokalRefresh)
-            : ENGINE.buildAttendanceState(row, lokalRefresh);
-          UI.renderStatusHariIni();
-          
-          // ✅ Aktifkan/nonaktifkan reminder berdasarkan status
-          if (STATE.absensiHariIni.status === 'SUDAH_DATANG') {
-            AbsenReminder.mulai();
-          } else {
-            AbsenReminder.stop();
-          }
-        }
-      } catch (err) {
-        console.log('Background sync gagal:', err.message);
       }
     },
 
@@ -3145,7 +2781,7 @@
       } catch (err) { 
         if (DOM.gpsStatus) DOM.gpsStatus.textContent = 'Gagal'; 
         UI.show(DOM.btnUlangGps); 
-        UI.show(DOM.btnGps);
+        UI.show(DOM.btnGps);  // FIX: tampilkan btnGps juga
         UI.setStatus(err.message, 'error'); 
       } 
     },
@@ -3175,6 +2811,7 @@
     async kirimAbsensiAktif() {
       if (STATE.sedangKirim) return;
       
+      // FIX #18: Lock timer 30 detik
       if (STATE.baruSajaKirim) {
         UI.setStatus('Mohon tunggu sebentar sebelum mengirim lagi.', 'warning');
         return;
@@ -3186,8 +2823,11 @@
       if (error) { UI.setStatus(error, 'error'); return; }
       
       STATE.sedangKirim = true;
-      if (DOM.btnKirim) BTN_LOADING.set(DOM.btnKirim, true);
-      if (DOM.btnMulaiAbsen) BTN_LOADING.set(DOM.btnMulaiAbsen, true);
+      const tk = DOM.btnKirim ? DOM.btnKirim.textContent : '';
+      const tm = DOM.btnMulaiAbsen ? DOM.btnMulaiAbsen.textContent : '';
+      
+      if (DOM.btnKirim) { DOM.btnKirim.disabled = true; DOM.btnKirim.textContent = 'Mengirim...'; }
+      if (DOM.btnMulaiAbsen) { DOM.btnMulaiAbsen.disabled = true; DOM.btnMulaiAbsen.textContent = 'Mengirim...'; }
       UI.setStatus('Mengirim data absensi...', 'warning');
       
       try {
@@ -3204,22 +2844,17 @@
               datang: data,
               pulang: null,
               expired: false,
-              _tanggalTugas: data.tanggalTugas || STORAGE.todayKey(),
-              _lintasHariDinasMalam: false
+              _tanggalTugas: data.tanggalTugas || STORAGE.todayKey()
             };
           } else if (sAbsen === 'Pulang') {
-            const tglTugasPulang = data.tanggalTugas || stateLokalLama._tanggalTugas || STORAGE.todayKey();
             dataTerpadu = {
               status: "SELESAI",
               detail: data.detailAbsen,
               datang: stateLokalLama.datang || data,
               pulang: data,
               expired: false,
-              _tanggalTugas: tglTugasPulang,
-              _lintasHariDinasMalam: false
+              _tanggalTugas: stateLokalLama._tanggalTugas || data.tanggalTugas || STORAGE.todayKey()
             };
-            // ✅ Stop reminder setelah absen pulang
-            AbsenReminder.stop();
           } else if (sAbsen === 'Keterangan') {
             dataTerpadu = {
               status: "KETERANGAN",
@@ -3227,8 +2862,7 @@
               datang: data,
               pulang: null,
               expired: false,
-              _tanggalTugas: data.tanggalTugas || STORAGE.todayKey(),
-              _lintasHariDinasMalam: false
+              _tanggalTugas: data.tanggalTugas || STORAGE.todayKey()
             };
           }
 
@@ -3251,8 +2885,8 @@
         UI.setStatus('Data kehadiran gagal dikirim. ' + err.message, 'error');
       } finally {
         STATE.sedangKirim = false;
-        if (DOM.btnKirim) BTN_LOADING.set(DOM.btnKirim, false);
-        if (DOM.btnMulaiAbsen) BTN_LOADING.set(DOM.btnMulaiAbsen, false);
+        if (DOM.btnKirim) { DOM.btnKirim.disabled = false; DOM.btnKirim.textContent = tk || 'Kirim'; }
+        if (DOM.btnMulaiAbsen) { DOM.btnMulaiAbsen.disabled = false; DOM.btnMulaiAbsen.textContent = tm || DOM.btnMulaiAbsen.textContent; UI.updateTombolMulaiAbsen(); }
       }
     },
 
@@ -3294,11 +2928,13 @@
       try { const res = await API.daftarPegawai(); if (res && res.sukses && Array.isArray(res.data)) UI.isiDaftarPegawaiBulanan(res.data); } catch (err) {}
     },
 
+    // DASHBOARD BULANAN + CACHE INDEXEDDB
     async muatDashboardBulanan() {
       const b = Number(DOM.dashboardBulan && DOM.dashboardBulan.value || (new Date().getMonth()+1));
       const t = Number(DOM.dashboardTahun && DOM.dashboardTahun.value || new Date().getFullYear());
       if (!b || !t) { UI.setStatus('Bulan dan tahun wajib diisi.', 'error'); return; }
 
+      // Cache-first: dashboard yang pernah dimuat ditampilkan langsung.
       const cached = await STORAGE.ambilCacheDashboardIDB(b, t);
       if (cached) {
         STATE.dashboardBulanan = cached;
@@ -3307,7 +2943,10 @@
         return;
       }
 
-      if (DOM.btnTampilkanDashboard) BTN_LOADING.set(DOM.btnTampilkanDashboard, true);
+      if (DOM.btnTampilkanDashboard) {
+        DOM.btnTampilkanDashboard.disabled = true;
+        DOM.btnTampilkanDashboard.textContent = 'Memuat...';
+      }
       UI.setStatus('Memuat dashboard...', 'warning');
       try {
         const res = await API.dashboardBulanan(b, t);
@@ -3322,16 +2961,21 @@
       } catch (err) {
         UI.setStatus('Gagal memuat dashboard: ' + err.message, 'error');
       } finally {
-        if (DOM.btnTampilkanDashboard) BTN_LOADING.set(DOM.btnTampilkanDashboard, false);
+        if (DOM.btnTampilkanDashboard) {
+          DOM.btnTampilkanDashboard.disabled = false;
+          DOM.btnTampilkanDashboard.textContent = 'Tampilkan Dashboard';
+        }
       }
     },
 
+    setLoadingRekapBulanan(l) { if (!DOM.btnTampilkanRekap) return; DOM.btnTampilkanRekap.disabled = l; DOM.btnTampilkanRekap.textContent = l ? 'Memuat...' : 'Tampilkan Rekap'; },
     async muatRekapBulanan() {
       const b = Number(DOM.rekapBulan && DOM.rekapBulan.value || (new Date().getMonth()+1));
       const t = Number(DOM.rekapTahun && DOM.rekapTahun.value || new Date().getFullYear());
       const id = (DOM.rekapPegawai && DOM.rekapPegawai.value) || 'SEMUA';
       if (!b || !t) { UI.setStatus('Bulan dan tahun wajib diisi.', 'error'); return; }
 
+      // Cache-first agar perpindahan tab dan pembukaan ulang lebih ringan.
       const cached = await STORAGE.ambilCacheBulananIDB(b, t, id);
       if (cached) {
         STATE.rekapBulanan = cached;
@@ -3340,7 +2984,7 @@
         return;
       }
 
-      if (DOM.btnTampilkanRekap) BTN_LOADING.set(DOM.btnTampilkanRekap, true);
+      this.setLoadingRekapBulanan(true);
       UI.setStatus('Memuat rekap bulanan...', 'warning');
       try {
         const res = await API.rekapBulanan(b, t, id);
@@ -3356,7 +3000,7 @@
       } catch (err) {
         UI.setStatus('Gagal memuat rekap bulanan: ' + err.message, 'error');
       } finally {
-        if (DOM.btnTampilkanRekap) BTN_LOADING.set(DOM.btnTampilkanRekap, false);
+        this.setLoadingRekapBulanan(false);
       }
     },
 
@@ -3386,23 +3030,27 @@
     },
 
     setTanggalAdmin(t) {
-      STATE.adminTanggal = t || STORAGE.todayKey();
-      if (DOM.adminTanggalFilter) {
-        DOM.adminTanggalFilter.value = STATE.adminTanggal;
-      }
-      this.muatRekapAdminHariIni(false);
-    },
-    
+  STATE.adminTanggal = t || STORAGE.todayKey();
+
+  if (DOM.adminTanggalFilter) {
+    DOM.adminTanggalFilter.value = STATE.adminTanggal;
+  }
+
+  this.muatRekapAdminHariIni(false);
+},
     geserTanggalAdmin(a) {
-      const d = STATE.adminTanggal || STORAGE.todayKey();
-      const x = new Date(d + 'T00:00:00');
-      x.setDate(x.getDate() + a);
-      this.setTanggalAdmin(UTIL.tanggalKeyWITA(x));
-    },
+  const d = STATE.adminTanggal || STORAGE.todayKey();
+  const x = new Date(d + 'T00:00:00');
+
+  x.setDate(x.getDate() + a);
+
+  this.setTanggalAdmin(UTIL.tanggalKeyWITA(x));
+},
 
     async muatRekapAdminHariIni(p) {
       const t = STATE.adminTanggal || STORAGE.todayKey();
 
+      // Cache-first hanya untuk pembukaan normal. Tombol refresh mengabaikan cache.
       if (!p) {
         let c = await STORAGE.ambilCacheAdminIDB(t);
         if (!c) c = STORAGE.ambilCacheAdmin(t);
@@ -3413,12 +3061,12 @@
         }
       }
 
-      if (p && DOM.btnRefreshAdmin) BTN_LOADING.set(DOM.btnRefreshAdmin, true);
       UI.setStatus('Memuat rekap admin...', 'warning');
       try {
         const res = await API.rekapAdminHariIni(t);
         if (res && res.sukses && res.data) {
           STATE.adminRekap = ENGINE.normalisasiRekapAdmin(Object.assign({ total:[], hadir:[], dinas:[], libur:[], belum:[] }, res.data));
+          // IndexedDB menjadi cache utama; localStorage tetap sebagai fallback.
           await STORAGE.simpanCacheAdminIDB(STATE.adminRekap, t);
           STORAGE.simpanCacheAdmin(STATE.adminRekap, t);
           UI.renderAdminRekap(STATE.adminRekap);
@@ -3430,8 +3078,6 @@
         }
       } catch (err) {
         UI.setStatus('Gagal memuat rekap admin: ' + err.message, 'error');
-      } finally {
-        if (p && DOM.btnRefreshAdmin) BTN_LOADING.set(DOM.btnRefreshAdmin, false);
       }
     },
 
@@ -3463,7 +3109,7 @@
       const idAdmin = this.getIdPegawaiAktif();
       if (!idPegawai || !idAdmin) { UI.setStatus('Data pegawai atau admin tidak tersedia.', 'error'); return; }
       if (!jenis) { UI.setStatus('Pilih jenis keterangan terlebih dahulu.', 'warning'); return; }
-      if (DOM.btnKirimKeteranganAdmin) BTN_LOADING.set(DOM.btnKirimKeteranganAdmin, true);
+      if (DOM.btnKirimKeteranganAdmin) { DOM.btnKirimKeteranganAdmin.disabled = true; DOM.btnKirimKeteranganAdmin.textContent = 'Mengirim...'; }
       try {
         const res = await API.simpanAbsensiAdmin({
           idAdmin: idAdmin, idPegawai: idPegawai, nama: pegawai.nama || '', statusAbsen: 'Keterangan',
@@ -3478,9 +3124,7 @@
         UI.setStatus(pesan, 'error');
         if (DOM.adminKeteranganError) { DOM.adminKeteranganError.textContent = pesan; DOM.adminKeteranganError.classList.remove('hidden'); }
       }
-      finally { 
-        if (DOM.btnKirimKeteranganAdmin) BTN_LOADING.set(DOM.btnKirimKeteranganAdmin, false); 
-      }
+      finally { if (DOM.btnKirimKeteranganAdmin) { DOM.btnKirimKeteranganAdmin.disabled = false; DOM.btnKirimKeteranganAdmin.textContent = 'Kirim'; } }
     },
 
     bukaDetailAbsensiAdmin(indeks) {
@@ -3553,9 +3197,8 @@
 
     gantiUser() {
       STATE.pegawaiAktif = null; STATE.terakhirServer = null; STATE.fotoBase64 = null; STATE.lokasiTerakhir = null; STATE.menuAbsenAktif = 'Datang';
-      STATE.absensiHariIni = { status: "BELUM_ABSEN", detail: "", datang: null, pulang: null, expired: false, _tanggalTugas: null, _lintasHariDinasMalam: false };
+      STATE.absensiHariIni = { status: "BELUM_ABSEN", detail: "", datang: null, pulang: null, expired: false };
       STORAGE.remove(STORAGE.pegawaiKey());
-      AbsenReminder.stop();
       UI.tampilkanRegistrasi();
       UI.setStatus('Silakan masuk menggunakan ID Pegawai lain.', 'success');
     },
@@ -3569,11 +3212,9 @@
         () => {
           STORAGE.resetPerangkatLokal();
           STATE.pegawaiAktif = null; STATE.terakhirServer = null; STATE.fotoBase64 = null; STATE.lokasiTerakhir = null; STATE.menuAbsenAktif = 'Datang'; 
-          STATE.absensiHariIni = { status: "BELUM_ABSEN", detail: "", datang: null, pulang: null, expired: false, _tanggalTugas: null, _lintasHariDinasMalam: false };
+          STATE.absensiHariIni = { status: "BELUM_ABSEN", detail: "", datang: null, pulang: null, expired: false };
           if (STATE.lockTimer) { clearTimeout(STATE.lockTimer); STATE.lockTimer = null; }
           STATE.baruSajaKirim = false;
-          BTN_LOADING.resetAll();
-          AbsenReminder.stop();
           UI.tampilkanRegistrasi();
           UI.setStatus('Cache perangkat berhasil dihapus. Silakan masukkan ID pegawai yang benar.', 'success');
         }
@@ -3581,20 +3222,38 @@
     },
 
     async updateRekapAdmin() {
-      if (DOM.btnUpdateRekap) BTN_LOADING.set(DOM.btnUpdateRekap, true);
-      UI.setStatus('Mengupdate rekap...', 'warning');
-      try {
-        const res = await API.updateRekap();
-        if (!res || !res.sukses) throw new Error((res && res.pesan) || 'Update rekap gagal.');
-        UI.setStatus('Rekap berhasil diupdate. Memuat data terbaru...', 'warning');
-        await this.muatRekapAdminHariIni(true);
-        UI.setStatus('Rekap berhasil diupdate.', 'success');
-      } catch (err) {
-        UI.setStatus('Gagal update rekap: ' + err.message, 'error');
-      } finally {
-        if (DOM.btnUpdateRekap) BTN_LOADING.set(DOM.btnUpdateRekap, false);
-      }
-    },
+  const tombol = document.querySelector('[data-action="update-rekap"]');
+
+  if (tombol) {
+    tombol.disabled = true;
+    tombol.textContent = '...';
+  }
+
+  UI.setStatus('Mengupdate rekap...', 'warning');
+
+  try {
+    const res = await API.updateRekap();
+
+    if (!res || !res.sukses) {
+      throw new Error((res && res.pesan) || 'Update rekap gagal.');
+    }
+
+    UI.setStatus('Rekap berhasil diupdate. Memuat data terbaru...', 'warning');
+
+    await this.muatRekapAdminHariIni(true);
+
+    UI.setStatus('Rekap berhasil diupdate.', 'success');
+
+  } catch (err) {
+    UI.setStatus('Gagal update rekap: ' + err.message, 'error');
+
+  } finally {
+    if (tombol) {
+      tombol.disabled = false;
+      tombol.textContent = '↻';
+    }
+  }
+},
 
     async refreshAplikasi() {
       try {
