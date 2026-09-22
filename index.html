@@ -490,6 +490,7 @@
                 <button type="button" class="header-menu-item" data-action="refresh-status">Refresh</button>
                 <button type="button" class="header-menu-item" data-action="open-history">Riwayat</button>
                 <button type="button" id="btnAdminPage" class="header-menu-item hidden" data-action="open-admin">Rekap</button>
+                <button type="button" class="header-menu-item" data-action="open-complaint">Pengaduan</button> 
                 <button type="button" id="btnSwitchUser" class="header-menu-item hidden" data-action="switch-user">Ganti User</button>
                 <button type="button" class="header-menu-item danger-menu" data-action="reset-device">Reset Perangkat</button>
               </div>
@@ -727,6 +728,66 @@
       <button type="button" class="btn-secondary" data-action="close-history">Tutup</button>
     </section>
 
+    <!-- SECTION FORM PENGADUAN (UPDATE) -->
+<section id="complaintArea" class="card hidden">
+  <div class="time-box">
+    <div class="clock currentClockText">--:--:--</div>
+    <div class="date currentDateText">-</div>
+  </div>
+  <h3 class="small-title">Form Pengaduan & Koreksi Absen</h3>
+  
+  <label for="complaintCategory">Kategori Kendala</label>
+  <select id="complaintCategory">
+    <option value="">-- Pilih Kategori --</option>
+    <option value="Masalah GPS">Masalah GPS / Lokasi</option>
+    <option value="Lupa Absen">Lupa Absen (Koreksi)</option>
+    <option value="Kendala Aplikasi">Bug / Error Aplikasi</option>
+    <option value="Lainnya">Lainnya</option>
+  </select>
+
+  <!-- TAMBAHAN: Tipe Absensi yang ingin dikoreksi -->
+  <label for="complaintAbsenType">Tipe Absensi yang Bermasalah</label>
+  <select id="complaintAbsenType">
+    <option value="">-- Pilih Tipe --</option>
+    <option value="Absen Datang">Absen Datang</option>
+    <option value="Absen Pulang">Absen Pulang</option>
+    <option value="Keterangan/Non-Absensi">Keterangan / Non-Absensi</option>
+  </select>
+
+  <!-- TAMBAHAN: Detail Dinas/Kegiatan -->
+  <label for="complaintAbsenDetail">Detail Dinas / Kegiatan</label>
+  <select id="complaintAbsenDetail">
+    <option value="">-- Pilih Detail --</option>
+    <optgroup label="Dinas">
+      <option value="Dinas Pagi">Dinas Pagi</option>
+      <option value="Dinas Sore">Dinas Sore</option>
+      <option value="Dinas Malam">Dinas Malam</option>
+      <option value="Dinas Luar">Dinas Luar</option>
+    </optgroup>
+    <optgroup label="Keterangan">
+      <option value="Libur">Libur</option>
+      <option value="Sakit">Sakit</option>
+      <option value="Cuti">Cuti</option>
+      <option value="Ijin">Ijin</option>
+      <option value="Lepas Malam">Lepas Malam</option>
+    </optgroup>
+  </select>
+
+  <label for="complaintDate">Tanggal Kejadian</label>
+  <input type="date" id="complaintDate">
+
+  <label for="complaintDesc">Deskripsi / Alasan Koreksi</label>
+  <textarea id="complaintDesc" rows="4" placeholder="Contoh: Saya sudah hadir jam 07.15 tapi GPS tidak terbaca, mohon koreksi absen datang saya."></textarea>
+
+  <label for="complaintFile">Lampiran Bukti (Opsional)</label>
+  <input type="file" id="complaintFile" accept="image/*">
+
+  <button id="btnKirimPengaduan" type="button" class="btn-main" data-action="send-complaint">Kirim Pengaduan</button>
+  <button type="button" class="btn-secondary" data-action="close-complaint">Batal</button>
+  
+  <div class="note">Laporan Anda akan diterima oleh admin dan diproses sesuai kebijakan.</div>
+</section>
+
     <div class="jam-kerja-info">
       <div class="jam-kerja-title">Jam Kerja UPT Puskesmas Lawawoi</div>
       <div class="jam-kerja-row"><span>Senin - Kamis</span><span>07.30 - 13.45</span></div>
@@ -735,7 +796,6 @@
       <div class="jam-kerja-row"><span>Dinas Sore</span><span>14.00 - 20.00</span></div>
       <div class="jam-kerja-row"><span>Dinas Malam</span><span>20.00 - 07.30</span></div>
     </div>
-  </div>
 
   <div id="customConfirmModal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); z-index:9999; display:none; align-items:center; justify-content:center; padding:18px;">
     <div class="card" style="width:100%; max-width:360px; margin:0; box-shadow:0 20px 25px -5px rgba(0,0,0,0.15); border-radius:18px; background:white; padding:18px;">
@@ -793,7 +853,7 @@
     TESTER_ID: '0000',
     CACHE_ADMIN_MS: 5 * 60 * 1000,
     INDEXEDDB_NAME: 'absensi_lawawoi_db',
-    INDEXEDDB_VERSION: 1,
+    INDEXEDDB_VERSION: 2,
     RIWAYAT_LIMIT: 30,
     CLEANUP_ABSEN_HARI: 2,
     STORAGE_PREFIX: 'absensi_lawawoi_',
@@ -807,6 +867,9 @@
       radius: 100
     },
     LOCK_SETELAH_KIRIM_MS: 30000,
+    OUTBOX_RETRY_MS: 15000,
+    POST_TIMEOUT_MS: 25000,
+    PEGAWAI_SYNC_MS: 6 * 60 * 60 * 1000,
    
     JADWAL_DINAS: {
       Datang: [
@@ -884,8 +947,10 @@
       'dashboardBulan', 'dashboardTahun', 'btnTampilkanDashboard', 'dashboardInfo', 'dashboardContent',
       'absenDatangSummary', 'summaryThumbContainer', 'summaryThumb', 'summaryDatangTitle', 'summaryDatangText',
       'formAbsensiFields', 'labelDetailAbsen', 'labelKeterangan', 'btnMulaiAbsen',
-      'formAbsensiTitle', 'noteFormAbsensi',
-      'containerDetailAbsen', 'containerKeterangan', 'infoSelesaiAbsen', 'modeSwitch'
+      'formAbsensiTitle', 'noteFormAbsensi', 
+      'containerDetailAbsen', 'containerKeterangan', 'infoSelesaiAbsen', 'modeSwitch', 
+      /// Tambahkan/Update bagian ini di initDOM()
+      'complaintArea', 'complaintCategory', 'complaintAbsenType', 'complaintAbsenDetail', 'complaintDate', 'complaintDesc', 'complaintFile', 'btnKirimPengaduan'
     ];
     explicitIds.forEach(function(id) { DOM[id] = document.getElementById(id); });
   }
@@ -1064,6 +1129,12 @@
           if (!db.objectStoreNames.contains('dashboard_bulanan')) {
             db.createObjectStore('dashboard_bulanan', { keyPath: 'key' });
           }
+          if (!db.objectStoreNames.contains('pegawai_master')) {
+            db.createObjectStore('pegawai_master', { keyPath: 'idPegawai' });
+          }
+          if (!db.objectStoreNames.contains('outbox_absensi')) {
+            db.createObjectStore('outbox_absensi', { keyPath: 'idTransaksi' });
+          }
         };
 
         req.onsuccess = function(e) {
@@ -1113,6 +1184,97 @@
           req.onerror = function() { reject(req.error || new Error('Gagal membaca cache IndexedDB.')); };
         });
       });
+    },
+
+    idbPutRecord(storeName, record) {
+      const self = this;
+      return self.bukaIndexedDB().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          const tx = db.transaction(storeName, 'readwrite');
+          tx.objectStore(storeName).put(record);
+          tx.oncomplete = function() { resolve(record); };
+          tx.onerror = function() { reject(tx.error || new Error('Gagal menyimpan data IndexedDB.')); };
+          tx.onabort = function() { reject(tx.error || new Error('Transaksi IndexedDB dibatalkan.')); };
+        });
+      });
+    },
+    idbGetRecord(storeName, key) {
+      const self = this;
+      return self.bukaIndexedDB().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          const tx = db.transaction(storeName, 'readonly');
+          const req = tx.objectStore(storeName).get(String(key));
+          req.onsuccess = function() { resolve(req.result || null); };
+          req.onerror = function() { reject(req.error || new Error('Gagal membaca IndexedDB.')); };
+        });
+      });
+    },
+    idbGetAll(storeName) {
+      const self = this;
+      return self.bukaIndexedDB().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          const tx = db.transaction(storeName, 'readonly');
+          const req = tx.objectStore(storeName).getAll();
+          req.onsuccess = function() { resolve(req.result || []); };
+          req.onerror = function() { reject(req.error || new Error('Gagal membaca daftar IndexedDB.')); };
+        });
+      });
+    },
+    idbDeleteRecord(storeName, key) {
+      const self = this;
+      return self.bukaIndexedDB().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          const tx = db.transaction(storeName, 'readwrite');
+          tx.objectStore(storeName).delete(String(key));
+          tx.oncomplete = function() { resolve(true); };
+          tx.onerror = function() { reject(tx.error || new Error('Gagal menghapus data IndexedDB.')); };
+        });
+      });
+    },
+    async simpanPegawaiIDB(p) {
+      if (!p) return;
+      const id = String(p.idPegawai || p.nik || '').trim();
+      if (!id) return;
+      await this.idbPutRecord('pegawai_master', Object.assign({}, p, { idPegawai: id, nik: p.nik || id, waktuSync: Date.now() }));
+    },
+    async ambilPegawaiIDB(id) {
+      const p = await this.idbGetRecord('pegawai_master', String(id || '').trim());
+      return p || null;
+    },
+    async simpanDaftarPegawaiIDB(list) {
+      const arr = Array.isArray(list) ? list : [];
+      for (const p of arr) await this.simpanPegawaiIDB(p);
+      return arr.length;
+    },
+    async ambilSemuaPegawaiIDB() {
+      return await this.idbGetAll('pegawai_master');
+    },
+    async simpanOutboxAbsensi(data) {
+      const id = String(data && data.idTransaksi || '').trim();
+      if (!id) throw new Error('ID transaksi tidak tersedia.');
+      const lama = await this.idbGetRecord('outbox_absensi', id);
+      const record = Object.assign({}, lama || {}, data, {
+        idTransaksi: id,
+        statusSync: lama && lama.statusSync === 'SELESAI' ? 'SELESAI' : (data.statusSync || 'MENUNGGU'),
+        percobaan: Number((lama && lama.percobaan) || 0),
+        dibuatPada: Number((lama && lama.dibuatPada) || Date.now()),
+        diperbaruiPada: Date.now()
+      });
+      return await this.idbPutRecord('outbox_absensi', record);
+    },
+    async ambilOutboxAbsensi() {
+      const all = await this.idbGetAll('outbox_absensi');
+      return all.filter(x => x && x.statusSync !== 'SELESAI');
+    },
+    async updateOutboxAbsensi(id, patch) {
+      const lama = await this.idbGetRecord('outbox_absensi', id);
+      if (!lama) return null;
+      return await this.idbPutRecord('outbox_absensi', Object.assign({}, lama, patch || {}, { diperbaruiPada: Date.now() }));
+    },
+    async selesaiOutboxAbsensi(id, hasil) {
+      const lama = await this.idbGetRecord('outbox_absensi', id);
+      if (!lama) return;
+      await this.idbPutRecord('outbox_absensi', Object.assign({}, lama, hasil || {}, { statusSync: 'SELESAI', selesaiPada: Date.now(), diperbaruiPada: Date.now(), fotoBase64: '' }));
     },
 
     async ambilCacheAdminIDB(t) {
@@ -1241,26 +1403,39 @@
         GLOBAL_LOADING.hide();
       }
     },
-    async post(d) {
+    async post(d, tm) {
       GLOBAL_LOADING.show('Mengirim data...');
+      const ctrl = ('AbortController' in window) ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), tm || CONFIG.POST_TIMEOUT_MS) : null;
       try {
         const body = Object.assign({ token: CONFIG.SHARED_SECRET }, d);
-        const r = await fetch(CONFIG.WEB_APP_URL, { method: 'POST', body: JSON.stringify(body) });
+        const r = await fetch(CONFIG.WEB_APP_URL, { method: 'POST', body: JSON.stringify(body), signal: ctrl ? ctrl.signal : undefined });
         if (!r.ok) throw new Error('Gagal mengirim data. Kode: ' + r.status);
         return await r.json();
+      } catch (e) {
+        if (e && e.name === 'AbortError') throw new Error('Server lambat merespons. Data tetap tersimpan dan akan dikirim otomatis.');
+        throw e;
       } finally {
+        if (timer) clearTimeout(timer);
         GLOBAL_LOADING.hide();
       }
     },
     cekPegawai(id) { return this.get({ aksi: 'cekNIK', nik: id }); },
     cekRiwayatTerakhir(id) { return this.get({ aksi: 'cekRiwayatTerakhir', idPegawai: id }); },
+    cekTransaksi(idTransaksi) { return this.get({ aksi: 'cekTransaksi', idTransaksi: idTransaksi }); },
     rekapAdminHariIni(t) { return this.get({ aksi: 'rekapHariIni', tanggal: t || STORAGE.todayKey() }, 45000); },
     updateRekap() {return this.get({ aksi: 'updateRekap' }, 45000);},
     dashboardBulanan(b, t) { return this.get({ aksi: 'dashboardBulanan', bulan: b, tahun: t }, 45000); },
     simpanAbsensiAdmin(d) { return this.get(Object.assign({ aksi: 'simpanAbsensiAdmin' }, d || {})); },
     rekapBulanan(b, t, id) { return this.get({ aksi: 'rekapBulanan', bulan: b, tahun: t, idPegawai: id || 'SEMUA' }); },
     daftarPegawai() { return this.get({ aksi: 'daftarPegawai' }); },
-    kirimAbsensi(d) { return this.post(d); }
+    kirimAbsensi(d) { return this.post(d); },
+
+    // Tambahkan di dalam object API
+    async kirimPengaduan(d) {
+    return this.post(Object.assign({ aksi: 'simpanPengaduan' }, d));
+    }
+
   };
 
   const ENGINE = {
@@ -2676,8 +2851,20 @@ renderThumbnailFoto(foto) {
       UI.updateNetworkStatus();
       setInterval(UI.updateJamTanggal.bind(UI), 1000);
       setInterval(UI.updateNetworkStatus.bind(UI), 5000);
+      setInterval(() => { if (navigator.onLine) this.prosesOutbox(); }, CONFIG.OUTBOX_RETRY_MS);
       STORAGE.cleanupAbsensiLama();
-      STATE.pegawaiAktif = STORAGE.ambilPegawai();
+      const pegawaiCacheLokal = STORAGE.ambilPegawai();
+      STATE.pegawaiAktif = pegawaiCacheLokal;
+      try {
+        await STORAGE.bukaIndexedDB();
+        if (pegawaiCacheLokal) {
+          const pegawaiIDB = await STORAGE.ambilPegawaiIDB(pegawaiCacheLokal.idPegawai || pegawaiCacheLokal.nik);
+          if (pegawaiIDB) {
+            STATE.pegawaiAktif = pegawaiIDB;
+            STORAGE.simpanPegawai(pegawaiIDB);
+          }
+        }
+      } catch (e) {}
 
       if (STATE.pegawaiAktif) {
         const lokal = STORAGE.ambilAbsensiAktif();
@@ -2690,8 +2877,11 @@ renderThumbnailFoto(foto) {
       }
       this.bindEvents();
 
-      // Buka IndexedDB di background. Tidak memblokir tampilan aplikasi.
-      STORAGE.bukaIndexedDB().catch(function() {});
+      // IndexedDB adalah penyimpanan utama master pegawai + antrean absensi.
+      STORAGE.bukaIndexedDB().then(async function() {
+        await this.sinkronkanMasterPegawai_();
+        await this.prosesOutbox();
+      }.bind(this)).catch(function() {});
       
       // FIX: Load model wajah di background, tidak menghambat UI
       muatModelWajah();
@@ -2700,7 +2890,7 @@ renderThumbnailFoto(foto) {
       setTimeout(function() { SPLASH.hide(); }, 6000);
     },
 
-    bindEvents() {
+        bindEvents() {
       document.addEventListener('click', (e) => {
         // FIX #17: Handle click pada foto thumbnail
         const fotoTarget = e.target.closest('[data-foto-url]');
@@ -2753,28 +2943,65 @@ renderThumbnailFoto(foto) {
           'send-attendance': () => this.kirimAbsensiAktif(),
           'switch-user': () => this.gantiUser(),
           'reset-device': () => this.resetPerangkat(),
+          
+          // --- TAMBAHAN FITUR PENGADUAN ---
+          'open-complaint': () => {
+            UI.hide(DOM.formArea);
+            UI.hide(DOM.adminPage);
+            UI.hide(DOM.rekapArea);
+            UI.show(DOM.complaintArea);
+          },
+          'close-complaint': () => {
+            UI.hide(DOM.complaintArea);
+            UI.show(DOM.formArea);
+          },
+          'send-complaint': () => this.prosesKirimPengaduan(),
+          // -------------------------------
         };
         if (actions[action]) {
           if (action !== 'toggle-header-menu') this.tutupHeaderMenu();
           actions[action]();
         }
       });
+
       if (DOM.keterangan) DOM.keterangan.addEventListener('input', () => UI.updateTombolMulaiAbsen());
+      
       if (DOM.adminTanggalFilter) {
-  DOM.adminTanggalFilter.addEventListener(
-    'change',
-    () => this.setTanggalAdmin(DOM.adminTanggalFilter.value)
-  );
-}
-      ['rekapBulan','rekapTahun'].forEach((id) => { if (DOM[id]) DOM[id].addEventListener('change', () => {
-        if (STATE.rekapBulanan && STATE.rekapBulanan.rows && STATE.rekapBulanan.rows.length) {
-          UI.renderRekapBulanan({ rows: [] });
-          if (DOM.rekapBulananInfo) DOM.rekapBulananInfo.textContent = 'Filter berubah. Tekan Tampilkan Rekap untuk memuat ulang.';
-        }
-      }); });
-      if (DOM.rekapPegawai) DOM.rekapPegawai.addEventListener('change', () => { if (STATE.rekapBulanan && STATE.rekapBulanan.rows && STATE.rekapBulanan.rows.length) this.muatRekapBulanan(); });
-      window.addEventListener('online', () => UI.updateNetworkStatus());
+        DOM.adminTanggalFilter.addEventListener(
+          'change',
+          () => this.setTanggalAdmin(DOM.adminTanggalFilter.value)
+        );
+      }
+
+      ['rekapBulan','rekapTahun'].forEach((id) => { 
+        if (DOM[id]) DOM[id].addEventListener('change', () => {
+          if (STATE.rekapBulanan && STATE.rekapBulanan.rows && STATE.rekapBulanan.rows.length) {
+            UI.renderRekapBulanan({ rows: [] });
+            if (DOM.rekapBulananInfo) DOM.rekapBulananInfo.textContent = 'Filter berubah. Tekan Tampilkan Rekap untuk memuat ulang.';
+          }
+        }); 
+      });
+
+      if (DOM.rekapPegawai) DOM.rekapPegawai.addEventListener('change', () => { 
+        if (STATE.rekapBulanan && STATE.rekapBulanan.rows && STATE.rekapBulanan.rows.length) this.muatRekapBulanan(); 
+      });
+
+      window.addEventListener('online', () => { UI.updateNetworkStatus(); APP.sinkronkanMasterPegawai_(); APP.prosesOutbox(); });
       window.addEventListener('offline', () => UI.updateNetworkStatus());
+    },
+
+
+    async sinkronkanMasterPegawai_() {
+      try {
+        const last = Number(STORAGE.read(CONFIG.STORAGE_PREFIX + 'pegawai_sync_time', 0) || 0);
+        if (last && Date.now() - last < CONFIG.PEGAWAI_SYNC_MS) return;
+        if (!navigator.onLine) return;
+        const res = await API.daftarPegawai();
+        if (res && res.sukses && Array.isArray(res.data)) {
+          await STORAGE.simpanDaftarPegawaiIDB(res.data);
+          STORAGE.write(CONFIG.STORAGE_PREFIX + 'pegawai_sync_time', Date.now());
+        }
+      } catch (e) {}
     },
 
     getIdPegawaiAktif() { return String(STATE.pegawaiAktif && (STATE.pegawaiAktif.idPegawai||STATE.pegawaiAktif.nik) || '').trim(); },
@@ -2789,21 +3016,27 @@ renderThumbnailFoto(foto) {
       const id = String(DOM.inputIdPegawai && DOM.inputIdPegawai.value || '').trim();
       const err = UTIL.validasiIdPegawai(id);
       if (err) { UI.setRegisterMessage(err, 'error'); return; }
-      UI.setRegisterMessage('Memeriksa ID Pegawai...', 'warning');
+      UI.setRegisterMessage('Mencari data pegawai di perangkat...', 'warning');
       try {
-        const res = await API.cekPegawai(id);
+        let pegawai = null;
+        try { pegawai = await STORAGE.ambilPegawaiIDB(id); } catch (e) {}
+
         if (CONFIG.MODE_UJI_COBA && id === CONFIG.TESTER_ID) {
-          STATE.pegawaiAktif = { idPegawai: CONFIG.TESTER_ID, nik: CONFIG.TESTER_ID, nama: 'MODE UJI COBA', jabatan: 'Tester' };
-          STORAGE.simpanPegawai(STATE.pegawaiAktif);
-          UI.setRegisterMessage('Mode uji coba aktif.', 'success');
-          STATE.absensiHariIni = ENGINE.buildAttendanceState(null, null);
-          UI.tampilkanFormAbsensi();
-          return;
+          pegawai = { idPegawai: CONFIG.TESTER_ID, nik: CONFIG.TESTER_ID, nama: 'MODE UJI COBA', jabatan: 'Tester', unit: '' };
         }
-        if (res && res.ditemukan) {
-          STATE.pegawaiAktif = { idPegawai: res.idPegawai||res.ID_Pegawai||res.nik||id, nik: res.idPegawai||res.ID_Pegawai||res.nik||id, nama: res.nama||'', jabatan: res.jabatan||'', unit: res.unit||'' };
-          STORAGE.simpanPegawai(STATE.pegawaiAktif);
-          UI.setRegisterMessage('Verifikasi berhasil. Memeriksa riwayat absensi...', 'warning');
+
+        if (!pegawai) {
+          const res = await API.cekPegawai(id);
+          if (res && res.ditemukan) {
+            pegawai = { idPegawai: res.idPegawai||res.ID_Pegawai||res.nik||id, nik: res.idPegawai||res.ID_Pegawai||res.nik||id, nama: res.nama||'', jabatan: res.jabatan||'', unit: res.unit||'' };
+            await STORAGE.simpanPegawaiIDB(pegawai);
+          }
+        }
+
+        if (pegawai) {
+          STATE.pegawaiAktif = pegawai;
+          STORAGE.simpanPegawai(pegawai);
+          UI.setRegisterMessage('Data pegawai ditemukan. Memeriksa riwayat absensi...', 'warning');
           try {
             const resRiwayat = await API.cekRiwayatTerakhir(id);
             const row = resRiwayat && resRiwayat.terakhir ? resRiwayat.terakhir : null;
@@ -2812,19 +3045,17 @@ renderThumbnailFoto(foto) {
             STATE.absensiHariIni = (resRiwayat && resRiwayat.sinkron)
               ? ENGINE.buildAttendanceStateFromSync(resRiwayat.sinkron, lokalLogin)
               : ENGINE.buildAttendanceState(row, lokalLogin);
-            UI.tampilkanFormAbsensi();
-            UI.setStatus(row ? 'Riwayat absensi terakhir dimuat dari server.' : 'Belum ada riwayat absensi.', row ? 'success' : 'warning');
-            setTimeout(() => UI.clearStatus(), 3000);
           } catch (e) {
             STATE.absensiHariIni = ENGINE.buildAttendanceState(null, STORAGE.ambilAbsensiHariIni());
-            UI.tampilkanFormAbsensi();
-            UI.setStatus('Gagal memuat riwayat. Menampilkan form absensi.', 'warning');
           }
-        } else {
-          UI.setRegisterMessage('ID Pegawai tidak ditemukan. Hubungi admin aplikasi.', 'error');
+          UI.tampilkanFormAbsensi();
+          UI.setStatus('Data pegawai dimuat dari perangkat. Absensi siap digunakan.', 'success');
+          setTimeout(() => UI.clearStatus(), 3000);
+          return;
         }
+        UI.setRegisterMessage('ID Pegawai tidak ditemukan atau tidak aktif.', 'error');
       } catch (err) {
-        UI.setRegisterMessage('Gagal menghubungi server. Periksa koneksi internet.', 'error');
+        UI.setRegisterMessage('Gagal memuat data pegawai: ' + err.message, 'error');
       }
     },
 
@@ -2951,85 +3182,243 @@ renderThumbnailFoto(foto) {
 
     async kirimAbsensiAktif() {
       if (STATE.sedangKirim) return;
-      
-      // FIX #18: Lock timer 30 detik
       if (STATE.baruSajaKirim) {
         UI.setStatus('Mohon tunggu sebentar sebelum mengirim lagi.', 'warning');
         return;
       }
-      
+
       const sAbsen = STATE.menuAbsenAktif || 'Datang';
       const data = ENGINE.buatDataAbsensi(sAbsen);
       const error = ENGINE.validasiBeforeSend(data, sAbsen);
       if (error) { UI.setStatus(error, 'error'); return; }
-      
+
+      data.idTransaksi = 'TX-' + Date.now() + '-' + String(this.getIdPegawaiAktif()).replace(/\D/g,'').slice(-8) + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
+      data.statusSync = 'MENUNGGU';
+
       STATE.sedangKirim = true;
       const tk = DOM.btnKirim ? DOM.btnKirim.textContent : '';
       const tm = DOM.btnMulaiAbsen ? DOM.btnMulaiAbsen.textContent : '';
-      
-      if (DOM.btnKirim) { DOM.btnKirim.disabled = true; DOM.btnKirim.textContent = 'Mengirim...'; }
-      if (DOM.btnMulaiAbsen) { DOM.btnMulaiAbsen.disabled = true; DOM.btnMulaiAbsen.textContent = 'Mengirim...'; }
-      UI.setStatus('Mengirim data absensi...', 'warning');
-      
+      if (DOM.btnKirim) { DOM.btnKirim.disabled = true; DOM.btnKirim.textContent = 'Menyimpan...'; }
+      if (DOM.btnMulaiAbsen) { DOM.btnMulaiAbsen.disabled = true; DOM.btnMulaiAbsen.textContent = 'Menyimpan...'; }
+
+      // Simpan ke antrean lokal (cepat, tidak butuh jaringan). Ini satu-satunya
+      // langkah yang benar-benar ditunggu (await) sebelum UI merespons balik.
       try {
-        const res = await API.kirimAbsensi(data);
-        if (res.linkFoto) data.linkFoto = res.linkFoto;
-        if (res && res.sukses) {
-          const stateLokalLama = STORAGE.ambilAbsensiHariIni();
-          let dataTerpadu = {};
-
-          if (sAbsen === 'Datang') {
-            dataTerpadu = {
-              status: "SUDAH_DATANG",
-              detail: data.detailAbsen,
-              datang: data,
-              pulang: null,
-              expired: false,
-              _tanggalTugas: data.tanggalTugas || STORAGE.todayKey()
-            };
-          } else if (sAbsen === 'Pulang') {
-            dataTerpadu = {
-              status: "SELESAI",
-              detail: data.detailAbsen,
-              datang: stateLokalLama.datang || data,
-              pulang: data,
-              expired: false,
-              _tanggalTugas: stateLokalLama._tanggalTugas || data.tanggalTugas || STORAGE.todayKey()
-            };
-          } else if (sAbsen === 'Keterangan') {
-            dataTerpadu = {
-              status: "KETERANGAN",
-              detail: data.detailAbsen,
-              datang: data,
-              pulang: null,
-              expired: false,
-              _tanggalTugas: data.tanggalTugas || STORAGE.todayKey()
-            };
-          }
-
-          STATE.absensiHariIni = dataTerpadu;
-          STORAGE.simpanAbsensiHariIni(dataTerpadu);
-          STATE.fotoBase64 = null; 
-          STATE.lokasiTerakhir = null;
-          if (sAbsen === 'Pulang') {
-            STORAGE.tambahRiwayatLengkap(dataTerpadu);
-          }
-          STATE.terakhirServer = Object.assign({}, data, { jam: data.timestampClient });
-          this.setLockSetelahKirim();
-          UI.tampilkanFormAbsensi();
-          UI.setStatus('Absensi berhasil dikirim.', 'success');
-          setTimeout(() => UI.clearStatus(), 2500);
-        } else {
-          UI.setStatus((res && res.pesan) || 'Absensi gagal dikirim.', 'error');
-        }
-      } catch (err) {
-        UI.setStatus('Data kehadiran gagal dikirim. ' + err.message, 'error');
-      } finally {
+        await STORAGE.simpanOutboxAbsensi(data);
+      } catch (e) {
+        UI.setStatus('Gagal menyimpan antrean lokal: ' + e.message, 'error');
         STATE.sedangKirim = false;
         if (DOM.btnKirim) { DOM.btnKirim.disabled = false; DOM.btnKirim.textContent = tk || 'Kirim'; }
         if (DOM.btnMulaiAbsen) { DOM.btnMulaiAbsen.disabled = false; DOM.btnMulaiAbsen.textContent = tm || DOM.btnMulaiAbsen.textContent; UI.updateTombolMulaiAbsen(); }
+        return;
+      }
+
+      // ===== RESPON OPTIMISTIS =====
+      // Data sudah aman tersimpan di perangkat, jadi UI langsung dianggap
+      // "terkirim" tanpa menunggu balasan server. Ini yang membuat aplikasi
+      // terasa cepat walau koneksi/server lambat. Proses pengiriman
+      // sebenarnya ke server dilanjutkan di latar belakang di bawah.
+      this.terapkanAbsensiLokalMenunggu_(data);
+      this.setLockSetelahKirim();
+      UI.setStatus(navigator.onLine
+        ? 'Absensi tersimpan. Mengirim ke server di latar belakang...'
+        : 'Absensi tersimpan di perangkat. Akan dikirim otomatis saat online.', 'success');
+      setTimeout(() => UI.clearStatus(), 2500);
+
+      STATE.sedangKirim = false;
+      if (DOM.btnKirim) { DOM.btnKirim.disabled = false; DOM.btnKirim.textContent = tk || 'Kirim'; }
+      if (DOM.btnMulaiAbsen) { DOM.btnMulaiAbsen.disabled = false; DOM.btnMulaiAbsen.textContent = tm || DOM.btnMulaiAbsen.textContent; UI.updateTombolMulaiAbsen(); }
+
+      // ===== PENGIRIMAN LATAR BELAKANG =====
+      // Tidak di-await oleh alur utama, jadi tidak memblokir tombol/UI.
+      this.kirimSatuOutbox(data, true).then((hasil) => {
+        if (!hasil || !hasil.sukses) throw new Error((hasil && hasil.pesan) || 'Server belum mengonfirmasi penyimpanan.');
+        this.terapkanAbsensiBerhasil_(data, hasil);
+        UI.setStatus(hasil.linkFoto && !/^FOTO BELUM|^FOTO GAGAL/i.test(hasil.linkFoto)
+          ? 'Absensi berhasil dikirim dan diverifikasi.'
+          : 'Absensi tersimpan. Foto masih diproses dan akan disinkronkan otomatis.', 'success');
+        setTimeout(() => UI.clearStatus(), 3500);
+      }).catch(async (err) => {
+        try {
+          await STORAGE.updateOutboxAbsensi(data.idTransaksi, { statusSync: 'MENUNGGU', errorTerakhir: err.message, percobaan: Number(data.percobaan || 0) + 1 });
+        } catch (e) {}
+        UI.setStatus('Absensi tersimpan di perangkat, tetapi belum terkonfirmasi server. Sistem akan mencoba mengirim otomatis saat koneksi tersedia.', 'warning');
+      });
+    },
+
+    async kirimSatuOutbox(data, tampilStatus) {
+      const id = String(data.idTransaksi || '').trim();
+      try {
+        await STORAGE.updateOutboxAbsensi(id, { statusSync: 'MENGIRIM', percobaan: Number(data.percobaan || 0) + 1, terakhirDicoba: Date.now() });
+        const hasil = await API.kirimAbsensi(data);
+        if (!hasil || !hasil.sukses) throw new Error((hasil && hasil.pesan) || 'Server menolak data.');
+        if (hasil.linkFoto) data.linkFoto = hasil.linkFoto;
+        const fotoMasihMenunggu = !!data.fotoBase64 && (!hasil.linkFoto || /^FOTO BELUM|^FOTO GAGAL/i.test(String(hasil.linkFoto || '')));
+        if (fotoMasihMenunggu) {
+          await STORAGE.updateOutboxAbsensi(id, Object.assign({}, data, hasil, { statusSync:'MENUNGGU_FOTO', errorTerakhir:'Link foto belum tersedia; akan dicoba lagi otomatis.' }));
+        } else {
+          await STORAGE.selesaiOutboxAbsensi(id, Object.assign({}, data, hasil));
+        }
+        return hasil;
+      } catch (e) {
+        // Jika timeout terjadi setelah server menyimpan, cek transaksi dengan ID yang sama.
+        try {
+          const cek = await API.cekTransaksi(id);
+          if (cek && cek.ditemukan) {
+            if (cek.linkFoto) data.linkFoto = cek.linkFoto;
+            await STORAGE.selesaiOutboxAbsensi(id, Object.assign({}, data, cek));
+            return Object.assign({ sukses: true, terverifikasi: true }, cek);
+          }
+        } catch (verifErr) {}
+        throw e;
       }
     },
+
+    async terapkanAbsensiBerhasil_(data, hasil) {
+      if (hasil && hasil.linkFoto) data.linkFoto = hasil.linkFoto;
+      const stateLokalLama = STORAGE.ambilAbsensiHariIni();
+      let dataTerpadu = {};
+      if (data.statusAbsen === 'Datang') {
+        dataTerpadu = { status:'SUDAH_DATANG', detail:data.detailAbsen, datang:data, pulang:null, expired:false, _tanggalTugas:data.tanggalTugas || STORAGE.todayKey() };
+      } else if (data.statusAbsen === 'Pulang') {
+        dataTerpadu = { status:'SELESAI', detail:data.detailAbsen, datang:stateLokalLama.datang || data, pulang:data, expired:false, _tanggalTugas:stateLokalLama._tanggalTugas || data.tanggalTugas || STORAGE.todayKey() };
+      } else {
+        dataTerpadu = { status:'KETERANGAN', detail:data.detailAbsen, datang:data, pulang:null, expired:false, _tanggalTugas:data.tanggalTugas || STORAGE.todayKey() };
+      }
+      STATE.absensiHariIni = dataTerpadu;
+      STORAGE.simpanAbsensiHariIni(dataTerpadu);
+      STATE.fotoBase64 = null;
+      STATE.lokasiTerakhir = null;
+      if (data.statusAbsen === 'Pulang') STORAGE.tambahRiwayatLengkap(dataTerpadu);
+      STATE.terakhirServer = Object.assign({}, data, { jam:data.timestampClient, linkFoto:hasil.linkFoto || data.linkFoto || '' });
+      UI.tampilkanFormAbsensi();
+    },
+
+    terapkanAbsensiLokalMenunggu_(data) {
+      const lama = STORAGE.ambilAbsensiHariIni();
+      let state;
+      if (data.statusAbsen === 'Datang') state = {status:'SUDAH_DATANG', detail:data.detailAbsen, datang:data, pulang:null, expired:false, _tanggalTugas:data.tanggalTugas || STORAGE.todayKey(), _syncPending:true};
+      else if (data.statusAbsen === 'Pulang') state = {status:'SELESAI', detail:data.detailAbsen, datang:lama.datang || data, pulang:data, expired:false, _tanggalTugas:lama._tanggalTugas || data.tanggalTugas || STORAGE.todayKey(), _syncPending:true};
+      else state = {status:'KETERANGAN', detail:data.detailAbsen, datang:data, pulang:null, expired:false, _tanggalTugas:data.tanggalTugas || STORAGE.todayKey(), _syncPending:true};
+      STATE.absensiHariIni = state;
+      STORAGE.simpanAbsensiHariIni(state);
+      UI.tampilkanFormAbsensi();
+    },
+
+    async prosesOutbox() {
+      if (STATE.sedangKirim || !navigator.onLine) return;
+      let daftar = [];
+      try { daftar = await STORAGE.ambilOutboxAbsensi(); } catch (e) { return; }
+      if (!daftar.length) return;
+      for (const item of daftar.sort((a,b) => Number(a.dibuatPada||0)-Number(b.dibuatPada||0))) {
+        if (!navigator.onLine) break;
+        try {
+          const hasil = await this.kirimSatuOutbox(item, false);
+          if (hasil && hasil.sukses && String(item.idPegawai) === this.getIdPegawaiAktif()) {
+            await this.terapkanAbsensiBerhasil_(item, hasil);
+          }
+        } catch (e) {
+          await STORAGE.updateOutboxAbsensi(item.idTransaksi, { statusSync:'MENUNGGU', errorTerakhir:e.message });
+        }
+      }
+    },
+
+        async prosesKirimPengaduan() {
+      const category = DOM.complaintCategory.value;
+      const absenType = DOM.complaintAbsenType.value; 
+      const absenDetail = DOM.complaintAbsenDetail.value; 
+      const date = DOM.complaintDate.value;
+      const desc = DOM.complaintDesc.value;
+      const file = DOM.complaintFile.files[0];
+
+      if (!category || !absenType || !absenDetail || !date || !desc) {
+        UI.setStatus('Mohon lengkapi semua field yang wajib diisi.', 'error');
+        return;
+      }
+
+      try {
+        DOM.btnKirimPengaduan.disabled = true;
+        DOM.btnKirimPengaduan.textContent = 'Mengirim...';
+        UI.setStatus('Mengirim pengaduan...', 'warning');
+
+        let base64File = '';
+        if (file) {
+          base64File = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+          });
+        }
+
+        const data = {
+          idPegawai: this.getIdPegawaiAktif(),
+          nik: this.getIdPegawaiAktif(),
+          nama: STATE.pegawaiAktif.nama,
+          category: category,
+          absenType: absenType,
+          absenDetail: absenDetail,
+          tanggal: date,
+          description: desc,
+          evidence: base64File,
+          timestamp: UTIL.timestampWITA(new Date())
+        };
+
+        const res = await API.kirimPengaduan(data);
+        
+        if (res && res.sukses) {
+          UI.setStatus('Pengaduan berhasil terkirim ke sistem.', 'success');
+
+          // =====================================================
+          // LOGIKA KIRIM NOTIFIKASI WHATSAPP
+          // =====================================================
+          const nomorWA = '6285230644184'; // Format internasional (08... jadi 628...)
+          
+          // Membuat format pesan
+          const pesan = [
+            '🔔 *NOTIFIKASI PENGADUAN MASUK* 🔔',
+            '',
+            `*Nama Pegawai:* ${STATE.pegawaiAktif.nama}`,
+            `*Tipe Absen:* ${absenType}`,
+            `*Detail Dinas:* ${absenDetail}`,
+            `*Tanggal:* ${date}`,
+            `*Kategori:* ${category}`,
+            `*Keluhan:* ${desc}`,
+            '',
+            '_Mohon segera dicek di Google Sheet Admin._'
+          ].join('\n');
+
+          // Encode pesan agar bisa dibaca oleh URL
+          const encodedPesan = encodeURIComponent(pesan);
+          const waUrl = `https://wa.me/${nomorWA}?text=${encodedPesan}`;
+
+          // Membuka WhatsApp Web di tab baru
+          window.open(waUrl, '_blank');
+          // =====================================================
+
+          // Reset form
+          DOM.complaintCategory.value = '';
+          DOM.complaintAbsenType.value = '';
+          DOM.complaintAbsenDetail.value = '';
+          DOM.complaintDate.value = '';
+          DOM.complaintDesc.value = '';
+          DOM.complaintFile.value = '';
+          
+          setTimeout(() => {
+            UI.hide(DOM.complaintArea);
+            UI.show(DOM.formArea);
+            UI.clearStatus();
+          }, 3000);
+        } else {
+          throw new Error(res.pesan || 'Gagal mengirim pengaduan.');
+        }
+      } catch (err) {
+        UI.setStatus(err.message, 'error');
+      } finally {
+        DOM.btnKirimPengaduan.disabled = false;
+        DOM.btnKirimPengaduan.textContent = 'Kirim Pengaduan';
+      }
+    },
+
 
     async bukaRiwayatPegawai() {
       const id = this.getIdPegawaiAktif();
